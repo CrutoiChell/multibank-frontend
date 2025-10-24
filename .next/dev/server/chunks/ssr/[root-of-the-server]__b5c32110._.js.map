@@ -2,5 +2,5 @@
   "version": 3,
   "sources": [],
   "sections": [
-    {"offset": {"line": 18, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/%D0%A0%D1%83%D1%81%D0%BB%D0%B0%D0%BD/Desktop/%D0%9F%D1%80%D0%BE%D0%B5%D0%BA%D1%82%D1%8B/multibank-frontend/src/app/dashboard/page.tsx"],"sourcesContent":["export default function Dashboard() {\r\n    return <div>Заглушка для главного дашборда</div>\r\n}"],"names":[],"mappings":";;;;;;AAAe,SAAS;IACpB,qBAAO,8OAAC;kBAAI;;;;;;AAChB","debugId":null}}]
+    {"offset": {"line": 18, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/astra/Desktop/ooo2/multibank-frontend/src/app/dashboard/page.tsx"],"sourcesContent":["export default function Dashboard() {\r\n    return <div>Заглушка для главного дашборда</div>\r\n}"],"names":[],"mappings":";;;;;;AAAe,SAAS;IACpB,qBAAO,8OAAC;kBAAI;;;;;;AAChB","debugId":null}}]
 }

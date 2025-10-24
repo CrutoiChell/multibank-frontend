@@ -272,37 +272,81 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
 __turbopack_context__.s([
     "authApi",
     ()=>authApi,
+    "useGetProfileQuery",
+    ()=>useGetProfileQuery,
     "useLoginMutation",
     ()=>useLoginMutation,
+    "useLogoutMutation",
+    ()=>useLogoutMutation,
     "useRegisterMutation",
     ()=>useRegisterMutation
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$reduxjs$2f$toolkit$2f$dist$2f$query$2f$react$2f$rtk$2d$query$2d$react$2e$modern$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_context__.i("[project]/node_modules/@reduxjs/toolkit/dist/query/react/rtk-query-react.modern.mjs [app-client] (ecmascript) <locals>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$reduxjs$2f$toolkit$2f$dist$2f$query$2f$rtk$2d$query$2e$modern$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/@reduxjs/toolkit/dist/query/rtk-query.modern.mjs [app-client] (ecmascript)");
 ;
+// Функция для получения токена из cookie
+const getTokenFromCookie = ()=>{
+    if (typeof document !== 'undefined') {
+        const cookies = document.cookie.split(';');
+        const tokenCookie = cookies.find((cookie)=>cookie.trim().startsWith('access_token='));
+        return tokenCookie ? tokenCookie.split('=')[1] : null;
+    }
+    return null;
+};
 const authApi = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$reduxjs$2f$toolkit$2f$dist$2f$query$2f$react$2f$rtk$2d$query$2d$react$2e$modern$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$locals$3e$__["createApi"])({
     reducerPath: 'authApi',
     baseQuery: (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$reduxjs$2f$toolkit$2f$dist$2f$query$2f$rtk$2d$query$2e$modern$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["fetchBaseQuery"])({
-        baseUrl: 'https://vtb-hack-ruby.vercel.app/'
+        baseUrl: 'https://vtb-hack-ruby.vercel.app/',
+        prepareHeaders: (headers)=>{
+            const token = getTokenFromCookie();
+            if (token) {
+                headers.set('authorization', `Bearer ${token}`);
+            }
+            return headers;
+        }
     }),
+    tagTypes: [
+        'Auth'
+    ],
     endpoints: (builder)=>({
             register: builder.mutation({
                 query: (userData)=>({
                         url: 'auth/register',
                         method: 'POST',
                         body: userData
-                    })
+                    }),
+                invalidatesTags: [
+                    'Auth'
+                ]
             }),
             login: builder.mutation({
                 query: (credentials)=>({
                         url: 'auth/login',
                         method: 'POST',
                         body: credentials
-                    })
+                    }),
+                invalidatesTags: [
+                    'Auth'
+                ]
+            }),
+            getProfile: builder.query({
+                query: ()=>'auth/profile',
+                providesTags: [
+                    'Auth'
+                ]
+            }),
+            logout: builder.mutation({
+                query: ()=>({
+                        url: 'auth/logout',
+                        method: 'POST'
+                    }),
+                invalidatesTags: [
+                    'Auth'
+                ]
             })
         })
 });
-const { useRegisterMutation, useLoginMutation } = authApi;
+const { useRegisterMutation, useLoginMutation, useGetProfileQuery, useLogoutMutation } = authApi;
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
     __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
 }

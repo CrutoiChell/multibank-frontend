@@ -7,7 +7,7 @@
   "static/chunks/node_modules_@floating-ui_react_dist_22386cb2._.js",
   "static/chunks/node_modules_@reduxjs_toolkit_dist_1237515d._.js",
   "static/chunks/node_modules_f2a1fe4c._.js",
-  "static/chunks/_242f0b76._.js"
+  "static/chunks/_41e82322._.js"
 ],
     source: "dynamic"
 });
