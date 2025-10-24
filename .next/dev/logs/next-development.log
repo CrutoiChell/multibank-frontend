@@ -1,0 +1,15 @@
+[00:00:06.521] Server  LOG      ✓ Ready in 4.8s
+[00:00:09.654] Server  LOG      ○ Compiling /profile ...
+[00:00:17.029] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:52.643] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:01:13.969] Browser LOG     Загрузка фото профиля
+[00:04:20.157] Browser LOG     Загрузка фото профиля
+[00:04:21.371] Browser LOG     Загрузка фото профиля
+[00:04:23.348] Browser LOG     Загрузка фото профиля
+[00:07:11.310] Browser LOG     Загрузка фото профиля
+[00:07:12.088] Browser LOG     Загрузка фото профиля
+[00:38:40.468] Browser LOG     Загрузка фото профиля
+[00:38:42.601] Browser LOG     Загрузка фото профиля
+[00:38:44.187] Browser LOG     Загрузка фото профиля
+[00:38:45.491] Browser LOG     Загрузка фото профиля
+[01:57:10.793] Server  LOG      ✓ Compiled in 2.4s

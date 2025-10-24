@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { MantineProvider } from '@mantine/core';
+import '@mantine/core/styles.css';
 
 export const metadata: Metadata = {
   title: "Мультибанк",
@@ -14,7 +16,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
+        <MantineProvider>
+          {children}
+        </MantineProvider>
       </body>
     </html>
   );
