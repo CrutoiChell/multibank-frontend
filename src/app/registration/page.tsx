@@ -2,6 +2,9 @@
 import { Button, Center, Container, PasswordInput, Stack, TextInput } from "@mantine/core";
 
 import { useRegisterMutation } from '@/lib/store/api/AuthApi';
+import { userApi } from '@/lib/store/api/UserApi';
+import { authApi } from '@/lib/store/api/AuthApi';
+import { useDispatch } from 'react-redux';
 import { useState } from 'react';
 
 export default function Registration() {
@@ -9,9 +12,13 @@ export default function Registration() {
   const [password, setPassword] = useState('');
 
   const [register, { isLoading }] = useRegisterMutation();
+  const dispatch = useDispatch();
 
   const handleSubmit = async () => {
     try {
+      dispatch(userApi.util.resetApiState());
+      dispatch(authApi.util.resetApiState());
+      
       const result = await register({ email, password }).unwrap();
       localStorage.setItem('access_token', result.access_token);
       localStorage.setItem('user', JSON.stringify(result.user));

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   Container,
   Grid,
@@ -23,6 +23,9 @@ import {
   TextInput,
   Textarea,
   Select,
+  Alert,
+  Loader,
+  Center,
 } from '@mantine/core';
 import {
   IconUser,
@@ -38,9 +41,17 @@ import {
   IconHistory,
   IconStar,
   IconUpload,
+  IconAlertCircle,
+  IconCheck,
 } from '@tabler/icons-react';
+import { useProfile } from '@/lib/hooks/useProfile';
+import { useLogoutMutation } from '@/lib/store/api/AuthApi';
+import { userApi } from '@/lib/store/api/UserApi';
+import { authApi } from '@/lib/store/api/AuthApi';
+import { useDispatch } from 'react-redux';
 
 export default function ProfilePage() {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [notifications, setNotifications] = useState({
     email: true,
     sms: true,
@@ -49,12 +60,43 @@ export default function ProfilePage() {
   });
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [profileData, setProfileData] = useState({
-    name: 'Илья Рахатов',
-    email: 'raxatMaster@mail.ru',
-    phone: '+7 (999) 777-77-77',
-    birthDate: '1990-05-15',
+  const [editError, setEditError] = useState<string | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    firstName: '',
+    lastName: '',
+    phone: '',
+    birthDate: '',
+    gender: '' as 'MALE' | 'FEMALE' | 'OTHER' | '',
   });
+
+  const {
+    user,
+    profile,
+    isLoading,
+    error,
+    handleUpdateUser,
+    handleUpdateProfile,
+    handleUploadAvatar,
+    getFullName,
+    getInitials,
+    hasAvatar,
+    formatDate,
+    formatBirthDate,
+  } = useProfile();
+
+  const [logout, { isLoading: logoutLoading }] = useLogoutMutation();
+  const dispatch = useDispatch();
+  useEffect(() => {
+    if (profile) {
+      setEditFormData({
+        firstName: profile.firstName || '',
+        lastName: profile.lastName || '',
+        phone: user?.phone || '',
+        birthDate: profile.birthDate ? profile.birthDate.split('T')[0] : '',
+        gender: profile.gender || '',
+      });
+    }
+  }, [profile, user]);
 
   const toggleNotification = (type: keyof typeof notifications) => {
     setNotifications(prev => ({
@@ -63,11 +105,83 @@ export default function ProfilePage() {
     }));
   };
 
-  const handleSaveProfile = () => {
-    // Здесь будет логика сохранения на бэкенд
-    console.log('Сохранение профиля:', profileData);
-    setIsEditModalOpen(false);
+  const handleSaveProfile = async () => {
+    try {
+      setEditError(null);
+      
+      if (user) {
+        await handleUpdateUser({
+          phone: editFormData.phone,
+        });
+      }
+
+      await handleUpdateProfile({
+        firstName: editFormData.firstName,
+        lastName: editFormData.lastName,
+        birthDate: editFormData.birthDate ? new Date(editFormData.birthDate).toISOString() : undefined,
+        gender: editFormData.gender || undefined,
+      });
+
+      setIsEditModalOpen(false);
+    } catch (error: any) {
+      console.error('Ошибка при сохранении профиля:', error);
+      console.error('Детали ошибки:', JSON.stringify(error, null, 2));
+      
+      const errorMessage = error?.data?.message || error?.message || 'Произошла ошибка при сохранении профиля';
+      setEditError(errorMessage);
+    }
   };
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      try {
+        await handleUploadAvatar(file);
+      } catch (error) {
+        console.error('Ошибка при загрузке аватара:', error);
+      }
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout().unwrap();
+      
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('user');
+      
+      document.cookie = 'access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+      
+      dispatch(userApi.util.resetApiState());
+      dispatch(authApi.util.resetApiState());
+      
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Ошибка при выходе:', error);
+    }
+  };
+
+  if (isLoading && !user && !profile) {
+    return (
+      <Container size="xl" py="xl">
+        <Center h={400}>
+          <Stack align="center" gap="md">
+            <Loader size="lg" />
+          </Stack>
+        </Center>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container size="xl" py="xl">
+        <Alert icon={<IconAlertCircle size={16} />} title="Ошибка" color="red">
+          {typeof error === 'string' ? error : 'Произошла ошибка при загрузке данных'}
+        </Alert>
+      </Container>
+    );
+  }
 
   return (
     <Container size="xl" py="xl">
@@ -86,7 +200,14 @@ export default function ProfilePage() {
                   <Menu.Item leftSection={<IconSettings size={14} />}>Настройки</Menu.Item>
                   <Menu.Item leftSection={<IconBell size={14} />}>Уведомления</Menu.Item>
                   <Menu.Divider />
-                  <Menu.Item leftSection={<IconLogout size={14} />} color="red">Выйти</Menu.Item>
+                  <Menu.Item 
+                    leftSection={<IconLogout size={14} />} 
+                    color="red"
+                    onClick={handleLogout}
+                    disabled={logoutLoading}
+                  >
+                    {logoutLoading ? 'Выход...' : 'Выйти'}
+                  </Menu.Item>
                 </Menu.Dropdown>
               </Menu>
             </Group>
@@ -106,11 +227,16 @@ export default function ProfilePage() {
                   if (overlay) overlay.style.opacity = '0';
                 }}
                 onClick={() => {
-                  console.log('Загрузка фото профиля');
+                  fileInputRef.current?.click();
                 }}
               >
-                <Avatar size={120} radius="xl" color="blue">
-                  <IconUser size={60} />
+                <Avatar 
+                  size={120} 
+                  radius="xl" 
+                  color="blue"
+                  src={hasAvatar() ? profile?.avatar : undefined}
+                >
+                  {hasAvatar() ? null : <IconUser size={60} />}
                 </Avatar>
                 <div
                   className="avatar-overlay"
@@ -135,33 +261,45 @@ export default function ProfilePage() {
               </div>
               
               <Stack align="center" gap="xs">
-                <Title order={3}>{profileData.name}</Title>
-                <Text size="sm" c="dimmed">{profileData.email}</Text>
-                <Badge color="green" variant="light">Активный</Badge>
+                <Title order={3}>{getFullName()}</Title>
+                <Text size="sm" c="dimmed">{user?.email}</Text>
+                <Badge color={user?.isActive ? "green" : "red"} variant="light">
+                  {user?.isActive ? "Активный" : "Неактивный"}
+                </Badge>
               </Stack>
 
               <Divider w="100%" />
 
               <Group justify="space-between" w="100%">
                 <Text size="sm" fw={500}>ID пользователя</Text>
-                <Text size="sm" c="dimmed">#12345</Text>
+                <Text size="sm" c="dimmed">#{user?.id}</Text>
               </Group>
 
               <Group justify="space-between" w="100%">
                 <Text size="sm" fw={500}>Дата регистрации</Text>
-                <Text size="sm" c="dimmed">15.01.2024</Text>
+                <Text size="sm" c="dimmed">{formatDate(user?.createdAt)}</Text>
               </Group>
 
               <Group justify="space-between" w="100%">
-                <Text size="sm" fw={500}>Последний вход</Text>
-                <Text size="sm" c="dimmed">Сегодня, 14:30</Text>
+                <Text size="sm" fw={500}>Телефон</Text>
+                <Text size="sm" c="dimmed">{user?.phone || 'Не указан'}</Text>
               </Group>
+
+              {profile?.birthDate && (
+                <Group justify="space-between" w="100%">
+                  <Text size="sm" fw={500}>Дата рождения</Text>
+                  <Text size="sm" c="dimmed">{formatBirthDate(profile.birthDate)}</Text>
+                </Group>
+              )}
 
               <Button 
                 fullWidth 
                 variant="light" 
                 leftSection={<IconEdit size={16} />}
-                onClick={() => setIsEditModalOpen(true)}
+                onClick={() => {
+                  setEditError(null);
+                  setIsEditModalOpen(true);
+                }}
               >
                 Редактировать профиль
               </Button>
@@ -358,45 +496,70 @@ export default function ProfilePage() {
         size="md"
       >
         <Stack gap="md">
+          {editError && (
+            <Alert icon={<IconAlertCircle size={16} />} title="Ошибка" color="red">
+              {editError}
+            </Alert>
+          )}
+          
           <TextInput
-            label="Имя и фамилия"
-            value={profileData.name}
-            onChange={(e) => setProfileData(prev => ({ ...prev, name: e.target.value }))}
+            label="Имя"
+            value={editFormData.firstName}
+            onChange={(e) => setEditFormData(prev => ({ ...prev, firstName: e.target.value }))}
             placeholder="Введите ваше имя"
           />
 
           <TextInput
-            label="Email"
-            type="email"
-            value={profileData.email}
-            onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
-            placeholder="Введите email"
+            label="Фамилия"
+            value={editFormData.lastName}
+            onChange={(e) => setEditFormData(prev => ({ ...prev, lastName: e.target.value }))}
+            placeholder="Введите вашу фамилию"
           />
 
           <TextInput
             label="Телефон"
-            value={profileData.phone}
-            onChange={(e) => setProfileData(prev => ({ ...prev, phone: e.target.value }))}
+            value={editFormData.phone}
+            onChange={(e) => setEditFormData(prev => ({ ...prev, phone: e.target.value }))}
             placeholder="+7 (999) 123-45-67"
           />
 
           <TextInput
             label="Дата рождения"
             type="date"
-            value={profileData.birthDate}
-            onChange={(e) => setProfileData(prev => ({ ...prev, birthDate: e.target.value }))}
+            value={editFormData.birthDate}
+            onChange={(e) => setEditFormData(prev => ({ ...prev, birthDate: e.target.value }))}
+          />
+
+          <Select
+            label="Пол"
+            placeholder="Выберите пол"
+            value={editFormData.gender}
+            onChange={(value) => setEditFormData(prev => ({ ...prev, gender: value as 'MALE' | 'FEMALE' | 'OTHER' | '' }))}
+            data={[
+              { value: 'MALE', label: 'Мужской' },
+              { value: 'FEMALE', label: 'Женский' },
+              { value: 'OTHER', label: 'Другой' },
+            ]}
           />
 
           <Group justify="flex-end" gap="sm" mt="md">
             <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
               Отмена
             </Button>
-            <Button onClick={handleSaveProfile}>
+            <Button onClick={handleSaveProfile} loading={isLoading}>
               Сохранить
             </Button>
           </Group>
         </Stack>
       </Modal>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        style={{ display: 'none' }}
+        onChange={handleAvatarUpload}
+      />
     </Container>
   );
 }
+
