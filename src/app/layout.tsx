@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
+import { Header } from "@/components/features/Header/Header";
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: "Мультибанк",
@@ -16,9 +18,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <MantineProvider>
+        <Providers>
+          <Header />
           {children}
-        </MantineProvider>
+        </Providers>
       </body>
     </html>
   );

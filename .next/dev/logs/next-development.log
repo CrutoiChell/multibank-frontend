@@ -1,15 +1,307 @@
-[00:00:06.521] Server  LOG      ✓ Ready in 4.8s
-[00:00:09.654] Server  LOG      ○ Compiling /profile ...
-[00:00:17.029] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:52.643] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:01:13.969] Browser LOG     Загрузка фото профиля
-[00:04:20.157] Browser LOG     Загрузка фото профиля
-[00:04:21.371] Browser LOG     Загрузка фото профиля
-[00:04:23.348] Browser LOG     Загрузка фото профиля
-[00:07:11.310] Browser LOG     Загрузка фото профиля
-[00:07:12.088] Browser LOG     Загрузка фото профиля
-[00:38:40.468] Browser LOG     Загрузка фото профиля
-[00:38:42.601] Browser LOG     Загрузка фото профиля
-[00:38:44.187] Browser LOG     Загрузка фото профиля
-[00:38:45.491] Browser LOG     Загрузка фото профиля
-[01:57:10.793] Server  LOG      ✓ Compiled in 2.4s
+[00:00:01.015] Server  LOG      ✓ Ready in 726ms
+[00:02:18.758] Server  ERROR    ⨯ Error: This function is not supported in React Server Components. Please only use this export in a Client Component.
+[00:02:19.451] Browser ERROR   uncaughtError: Error: This function is not supported in React Server Components. Please only use this export in a Client Component.
+[00:02:22.205] Server  ERROR    ⨯ Error: This function is not supported in React Server Components. Please only use this export in a Client Component.
+[00:02:23.453] Browser ERROR   uncaughtError: Error: This function is not supported in React Server Components. Please only use this export in a Client Component.
+[00:02:25.397] Server  ERROR    ⨯ ReferenceError: s is not defined
+[00:02:26.445] Browser ERROR   uncaughtError: ReferenceError: s is not defined
+[00:02:28.733] Server  ERROR   Store does not have a valid reducer. Make sure the argument passed to combineReducers is an object whose values are reducers.
+[00:02:28.746] Server  ERROR    ⨯ Error: This function is not supported in React Server Components. Please only use this export in a Client Component.
+[00:02:29.444] Browser ERROR   uncaughtError: Error: This function is not supported in React Server Components. Please only use this export in a Client Component.
+[00:06:45.829] Server  ERROR    ⨯ Error: This function is not supported in React Server Components. Please only use this export in a Client Component.
+[00:06:46.036] Browser ERROR   uncaughtError: Error: This function is not supported in React Server Components. Please only use this export in a Client Component.
+[00:06:59.509] Server  WARN     ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[00:06:59.656] Server  ERROR    ⨯ Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+[00:06:59.668] Server  LOG      ✓ Compiled in 101ms
+[00:07:00.453] Browser ERROR   uncaughtError: Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+[00:07:01.808] Server  ERROR    ⨯ Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+[00:07:02.443] Browser ERROR   uncaughtError: Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+[00:07:09.443] Browser ERROR   ./src/app/layout.tsx:21:22
+Parsing ecmascript source code failed
+  19 |       <body>
+  20 |         <Provider
+> 21 |             <Header />
+     |                      ^
+  22 |             {children}
+  23 |       </body>
+  24 |     </html>
+
+Expression expected
+[00:07:09.443] Browser ERROR   ./src/app/layout.tsx:23:8
+Parsing ecmascript source code failed
+  21 |             <Header />
+  22 |             {children}
+> 23 |       </body>
+     |        ^^^^^^
+  24 |     </html>
+  25 |   );
+  26 | }
+
+Unterminated regexp literal
+[00:07:10.441] Browser ERROR   ./src/app/layout.tsx:22:22
+Parsing ecmascript source code failed
+  20 |       <body>
+  21 |         <Providers
+> 22 |             <Header />
+     |                      ^
+  23 |             {children}
+  24 |       </body>
+  25 |     </html>
+
+Expression expected
+[00:07:10.441] Browser ERROR   ./src/app/layout.tsx:24:8
+Parsing ecmascript source code failed
+  22 |             <Header />
+  23 |             {children}
+> 24 |       </body>
+     |        ^^^^^^
+  25 |     </html>
+  26 |   );
+  27 | }
+
+Unterminated regexp literal
+[00:07:12.668] Server  ERROR   Store does not have a valid reducer. Make sure the argument passed to combineReducers is an object whose values are reducers.
+[00:07:12.708] Server  ERROR    ⨯ Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+[00:07:12.723] Server  WARN     ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[00:07:13.445] Browser ERROR   Store does not have a valid reducer. Make sure the argument passed to combineReducers is an object whose values are reducers.
+[00:07:13.445] Browser ERROR   uncaughtError: Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+[00:07:13.825] Server  ERROR   Store does not have a valid reducer. Make sure the argument passed to combineReducers is an object whose values are reducers.
+[00:07:13.854] Server  ERROR    ⨯ Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+[00:07:14.440] Browser ERROR   Store does not have a valid reducer. Make sure the argument passed to combineReducers is an object whose values are reducers.
+[00:07:14.440] Browser ERROR   uncaughtError: Error: @mantine/core: MantineProvider was not found in component tree, make sure you have it in your app
+[00:07:16.154] Server  ERROR   Store does not have a valid reducer. Make sure the argument passed to combineReducers is an object whose values are reducers.
+[00:07:16.449] Browser ERROR   Store does not have a valid reducer. Make sure the argument passed to combineReducers is an object whose values are reducers.
+[00:07:17.362] Browser WARN    Image with src "/_next/static/media/Logo.9dd3624b.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[00:07:18.372] Browser ERROR   Store does not have a valid reducer. Make sure the argument passed to combineReducers is an object whose values are reducers.
+[00:07:18.372] Browser WARN    Image with src "/_next/static/media/Logo.9dd3624b.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[00:07:46.720] Browser ERROR   Store does not have a valid reducer. Make sure the argument passed to combineReducers is an object whose values are reducers.
+[00:08:35.356] Server  LOG      ✓ Compiled in 4ms
+[00:08:38.779] Server  LOG      ✓ Compiled in 3ms
+[00:10:19.790] Server  ERROR    ⨯ ReferenceError: authApi is not defined
+[00:10:19.802] Server  LOG      ✓ Compiled in 5ms
+[00:10:20.453] Browser ERROR   uncaughtError: ReferenceError: authApi is not defined
+[00:11:15.320] Server  WARN     ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[00:11:15.496] Server  WARN     ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[00:11:15.497] Server  WARN     ⚠ Fast Refresh had to perform a full reload when ./src/lib/store/Index.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[00:11:15.497] Server  WARN     ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[00:11:15.497] Server  LOG      ✓ Compiled in 87ms
+[00:11:25.835] Server  LOG      ✓ Compiled in 6ms
+[00:11:29.577] Browser WARN    Image with src "/_next/static/media/Logo.9dd3624b.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[00:12:51.843] Server  LOG      ✓ Compiled in 6ms
+[00:12:55.706] Server  LOG      ✓ Compiled in 13ms
+[00:14:42.157] Server  LOG      ✓ Compiled in 5ms
+[00:14:43.808] Server  LOG      ✓ Compiled in 3ms
+[00:14:47.063] Server  LOG      ✓ Compiled in 17ms
+[00:16:20.786] Server  ERROR    ⨯ ./src/app/registration/page.tsx:2:1
+Module not found: Can't resolve '@/lib/store/api/authApi'
+  1 | // 1. Добавить импорт
+> 2 | import { useRegisterMutation } from '@/lib/store/api/authApi';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  3 | import { useState } from 'react';
+  4 |
+  5 | export default function Registration() {
+
+Import map: aliased to relative './src/lib/store/api/authApi' inside of [project]/
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:16:20.787] Server  ERROR    ⨯ ./src/app/registration/page.tsx:2:1
+Module not found: Can't resolve '@/lib/store/api/authApi'
+  1 | // 1. Добавить импорт
+> 2 | import { useRegisterMutation } from '@/lib/store/api/authApi';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  3 | import { useState } from 'react';
+  4 |
+  5 | export default function Registration() {
+
+Import map: aliased to relative './src/lib/store/api/authApi' inside of [project]/
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:16:20.825] Server  LOG      ✓ Compiled in 22ms
+[00:16:21.442] Browser ERROR   ./src/app/registration/page.tsx:3:10
+Ecmascript file had an error
+  1 | // 1. Добавить импорт
+  2 | import { useRegisterMutation } from '@/lib/store/api/authApi';
+> 3 | import { useState } from 'react';
+    |          ^^^^^^^^
+  4 |
+  5 | export default function Registration() {
+  6 |   // 2. Добавить стейты для полей
+
+You're importing a component that needs `useState`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive.
+
+ Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+[00:16:21.442] Browser ERROR   ./src/app/registration/page.tsx:2:1
+Module not found: Can't resolve '@/lib/store/api/authApi'
+  1 | // 1. Добавить импорт
+> 2 | import { useRegisterMutation } from '@/lib/store/api/authApi';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  3 | import { useState } from 'react';
+  4 |
+  5 | export default function Registration() {
+
+Import map: aliased to relative './src/lib/store/api/authApi' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found
+[00:16:26.633] Server  ERROR    ⨯ ./src/app/registration/page.tsx:4:1
+Module not found: Can't resolve '@/lib/store/api/authApi'
+  2 |
+  3 | // 1. Добавить импорт
+> 4 | import { useRegisterMutation } from '@/lib/store/api/authApi';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { useState } from 'react';
+  6 |
+  7 | export default function Registration() {
+
+Import map: aliased to relative './src/lib/store/api/authApi' inside of [project]/
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:16:26.635] Server  ERROR    ⨯ ./src/app/registration/page.tsx:4:1
+Module not found: Can't resolve '@/lib/store/api/authApi'
+  2 |
+  3 | // 1. Добавить импорт
+> 4 | import { useRegisterMutation } from '@/lib/store/api/authApi';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { useState } from 'react';
+  6 |
+  7 | export default function Registration() {
+
+Import map: aliased to relative './src/lib/store/api/authApi' inside of [project]/
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:16:26.637] Server  ERROR    ⨯ ./src/app/registration/page.tsx:4:1
+Module not found: Can't resolve '@/lib/store/api/authApi'
+  2 |
+  3 | // 1. Добавить импорт
+> 4 | import { useRegisterMutation } from '@/lib/store/api/authApi';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { useState } from 'react';
+  6 |
+  7 | export default function Registration() {
+
+Import map: aliased to relative './src/lib/store/api/authApi' inside of [project]/
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:16:26.639] Server  ERROR    ⨯ ./src/app/registration/page.tsx:4:1
+Module not found: Can't resolve '@/lib/store/api/authApi'
+  2 |
+  3 | // 1. Добавить импорт
+> 4 | import { useRegisterMutation } from '@/lib/store/api/authApi';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { useState } from 'react';
+  6 |
+  7 | export default function Registration() {
+
+Import map: aliased to relative './src/lib/store/api/authApi' inside of [project]/
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:16:27.445] Browser ERROR   ./src/app/registration/page.tsx:5:10
+Ecmascript file had an error
+  3 | // 1. Добавить импорт
+  4 | import { useRegisterMutation } from '@/lib/store/api/authApi';
+> 5 | import { useState } from 'react';
+    |          ^^^^^^^^
+  6 |
+  7 | export default function Registration() {
+  8 |   // 2. Добавить стейты для полей
+
+You're importing a component that needs `useState`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive.
+
+ Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+[00:16:27.445] Browser ERROR   ./src/app/registration/page.tsx:4:1
+Module not found: Can't resolve '@/lib/store/api/authApi'
+  2 |
+  3 | // 1. Добавить импорт
+> 4 | import { useRegisterMutation } from '@/lib/store/api/authApi';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { useState } from 'react';
+  6 |
+  7 | export default function Registration() {
+
+Import map: aliased to relative './src/lib/store/api/authApi' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found
+[00:16:37.447] Browser ERROR   ./src/app/registration/page.tsx:5:10
+Ecmascript file had an error
+  3 | // 1. Добавить импорт
+  4 | import { useRegisterMutation } from '@/lib/store/api/AuthApi';
+> 5 | import { useState } from 'react';
+    |          ^^^^^^^^
+  6 |
+  7 | export default function Registration() {
+  8 |   // 2. Добавить стейты для полей
+
+You're importing a component that needs `useState`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive.
+
+ Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+[00:17:11.569] Browser ERROR   ./src/app/registration/page.tsx:6:10
+Ecmascript file had an error
+  4 | // 1. Добавить импорт
+  5 | import { useRegisterMutation } from '@/lib/store/api/AuthApi';
+> 6 | import { useState } from 'react';
+    |          ^^^^^^^^
+  7 |
+  8 | export default function Registration() {
+  9 |   // 2. Добавить стейты для полей
+
+You're importing a component that needs `useState`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive.
+
+ Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+[00:17:17.223] Browser WARN    Image with src "/_next/static/media/Logo.9dd3624b.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[00:17:29.848] Browser ERROR   Ошибка регистрации: {}
+[00:18:53.107] Server  LOG      ✓ Compiled in 5ms
+[00:18:58.367] Browser WARN    Image with src "/_next/static/media/Logo.9dd3624b.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[00:19:15.176] Browser ERROR   Ошибка регистрации: {"data":{"error":"Not Found","message":"Cannot POST /api/auth/register","statusCode":404},"status":404}
+[00:19:33.382] Browser ERROR   Ошибка регистрации: {"data":{"error":"Not Found","message":"Cannot POST /api/auth/register","statusCode":404},"status":404}
+[00:19:35.369] Browser ERROR   Ошибка регистрации: {"data":{"error":"Not Found","message":"Cannot POST /api/auth/register","statusCode":404},"status":404}
+[00:19:58.858] Server  LOG      ✓ Compiled in 11ms
+[00:20:04.110] Browser LOG     Успешная регистрация: {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImVtYWlsIjoiaXZhbm92MTIzQGdtYWlsLmNvbSIsImlhdCI6MTc2MTMyODMyMywiZXhwIjoxNzYxNDE0NzIzfQ.WVRjEdGI3fJgGSpkzaUE9In59dkjNWq5nfhvHUlrPIs","user":{"createdAt":"2025-10-24T17:52:02.380Z","email":"ivanov123@gmail.com","id":6}}
+[00:20:50.873] Browser WARN    Image with src "/_next/static/media/Logo.9dd3624b.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[00:21:33.465] Server  LOG      ✓ Compiled in 16ms
+[00:21:34.439] Browser ERROR   ./src/app/registration/page.tsx:28:9
+Ecmascript file had an error
+  26 |   };
+  27 |
+> 28 |   const handleSubmit = async () => {
+     |         ^^^^^^^^^^^^
+  29 |   try {
+  30 |     const result = await register({ email, password }).unwrap();
+  31 |     console.log('Успешная регистрация:', result);
+
+the name `handleSubmit` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/app/registration/page.tsx [Client Component Browser]
+    ./src/app/registration/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/registration/page.tsx [Client Component SSR]
+    ./src/app/registration/page.tsx [Server Component]
+[00:21:56.128] Server  LOG      ✓ Compiled in 3ms
+[00:23:12.041] Server  LOG      ✓ Compiled in 49ms
+[00:24:17.919] Server  LOG      ✓ Compiled in 48ms
+[00:24:43.185] Browser ERROR   Ошибка входа: {"data":{"error":"Unauthorized","message":"Неверные учетные данные","statusCode":401},"status":401}

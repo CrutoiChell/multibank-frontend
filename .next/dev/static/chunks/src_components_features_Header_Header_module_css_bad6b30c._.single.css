@@ -1,0 +1,37 @@
+/* [project]/src/components/features/Header/Header.module.css [app-client] (css) */
+.Header-module__i0sbPG__header {
+  background-color: #fff;
+  border-bottom: 1px solid #e9ecef;
+  height: 60px;
+  box-shadow: 0 1px 3px #0000001a;
+}
+
+.Header-module__i0sbPG__inner {
+  justify-content: space-between;
+  align-items: center;
+  height: 60px;
+  display: flex;
+}
+
+.Header-module__i0sbPG__link {
+  color: #495057;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  transition: all .2s;
+  display: block;
+}
+
+.Header-module__i0sbPG__link:hover {
+  color: #228be6;
+  background-color: #f8f9fa;
+}
+
+.Header-module__i0sbPG__linkLabel {
+  margin-right: 5px;
+}
+
+/*# sourceMappingURL=src_components_features_Header_Header_module_css_bad6b30c._.single.css.map*/
