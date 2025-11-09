@@ -31,10 +31,6 @@ export function AdsModal() {
       const savedAds = localStorage.getItem(ADS_STORAGE_KEY);
       if (savedAds) {
         const adsArray: Ad[] = JSON.parse(savedAds);
-        console.log('AdsModal: loaded ads from localStorage', { 
-          count: adsArray.length,
-          ads: adsArray 
-        });
         
         if (adsArray.length > 0) {
           // Выбираем рекламу по lastViewedAt (самая новая или null)
@@ -52,18 +48,8 @@ export function AdsModal() {
               return dateB - dateA; // Обратный порядок - самая новая первая
             })[0]; // Берем первую (самую новую или без lastViewedAt)
           
-          console.log('AdsModal: checking localStorage ad', { 
-            selectedAdId: selectedAd?.id, 
-            selectedAd,
-            adsArrayLength: adsArray.length,
-            allAds: adsArray.map(ad => ({ id: ad.id, lastViewedAt: ad.lastViewedAt }))
-          });
-          
           // Обновляем рекламу на выбранную по lastViewedAt
           if (selectedAd) {
-            console.log('AdsModal: updating ad from localStorage', { 
-              newAd: selectedAd 
-            });
             setCurrentAd((prevAd) => {
               // Обновляем только если реклама изменилась
               if (!prevAd || prevAd.id !== selectedAd.id) {
@@ -76,8 +62,6 @@ export function AdsModal() {
             localStorage.setItem(STORAGE_KEY, selectedAd.id.toString());
           }
         }
-      } else {
-        console.log('AdsModal: no ads in localStorage');
       }
     } catch (error) {
       console.error('Failed to load ads from localStorage:', error);
@@ -95,7 +79,6 @@ export function AdsModal() {
 
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === ADS_STORAGE_KEY && e.newValue) {
-        console.log('AdsModal: localStorage changed, reloading ad');
         loadLastAdFromStorage();
       }
     };
@@ -105,7 +88,6 @@ export function AdsModal() {
     
     // Также слушаем кастомное событие для изменений в этой же вкладке
     const handleCustomStorageChange = () => {
-      console.log('AdsModal: custom storage change event, reloading ad');
       loadLastAdFromStorage();
     };
     
@@ -139,7 +121,6 @@ export function AdsModal() {
   useEffect(() => {
     const handleNewAd = (event: CustomEvent<Ad>) => {
       const newAd = event.detail;
-      console.log('AdsModal: received new ad event', newAd);
       
       // Обновляем localStorage с новой рекламой
       try {
@@ -158,7 +139,6 @@ export function AdsModal() {
         
         // Сохраняем обновленный массив в localStorage
         localStorage.setItem(ADS_STORAGE_KEY, JSON.stringify(adsArray));
-        console.log('AdsModal: updated localStorage with new ad', { newAd, adsArray });
         
         // Выбираем рекламу по lastViewedAt (самая новая или null)
         const selectedAd = adsArray
@@ -177,7 +157,6 @@ export function AdsModal() {
         
         // Обновляем текущую рекламу на выбранную по lastViewedAt
         if (selectedAd) {
-          console.log('AdsModal: showing selected ad from new ad event', { selectedAd });
           setCurrentAd(selectedAd);
           setIsOpen(true);
           // Сохраняем ID показанной рекламы
@@ -209,13 +188,10 @@ export function AdsModal() {
       adsArray = data.ads;
     }
 
-    console.log('AdsModal: received ads data', { adsArray, length: adsArray.length, data });
-
     if (adsArray.length > 0) {
       // Сохраняем рекламы в localStorage
       try {
         localStorage.setItem(ADS_STORAGE_KEY, JSON.stringify(adsArray));
-        console.log('AdsModal: saved ads to localStorage', adsArray.length);
         
         // Отправляем событие об обновлении localStorage
         window.dispatchEvent(new CustomEvent('localStorage-updated'));
@@ -238,24 +214,13 @@ export function AdsModal() {
           return dateB - dateA; // Обратный порядок - самая новая первая
         })[0]; // Берем первую (самую новую или без lastViewedAt)
 
-      console.log('AdsModal: checking ad', { 
-        selectedAdId: selectedAd?.id, 
-        selectedAd,
-        adsArrayLength: adsArray.length,
-        currentAdId: currentAd?.id,
-        allAds: adsArray.map(ad => ({ id: ad.id, lastViewedAt: ad.lastViewedAt }))
-      });
-
       // Показываем выбранную рекламу по lastViewedAt
       if (selectedAd && (!currentAd || currentAd.id !== selectedAd.id)) {
-        console.log('AdsModal: showing selected ad (updated)', { oldAd: currentAd, newAd: selectedAd });
         setCurrentAd(selectedAd);
         setIsOpen(true);
         // Сохраняем ID показанной рекламы
         localStorage.setItem(STORAGE_KEY, selectedAd.id.toString());
       }
-    } else {
-      console.log('AdsModal: no ads in response');
     }
   }, [data, isAuthenticated]);
 
@@ -268,30 +233,14 @@ export function AdsModal() {
     setIsOpen(false);
   };
 
-  // Отладочная информация
-  useEffect(() => {
-    console.log('AdsModal render state:', {
-      isLoading,
-      hasCurrentAd: !!currentAd,
-      currentAd,
-      isOpen,
-      isAuthenticated,
-      hasData: !!data,
-      data
-    });
-  }, [isLoading, currentAd, isOpen, isAuthenticated, data]);
-
   // Не скрываем компонент во время загрузки, если есть реклама из localStorage
   // if (isLoading && !currentAd) {
   //   return null;
   // }
 
   if (!currentAd || !isOpen) {
-    console.log('AdsModal: not rendering - no ad or not open', { currentAd, isOpen });
     return null;
   }
-
-  console.log('AdsModal: rendering ad', currentAd);
 
   return (
     <AnimatePresence>
