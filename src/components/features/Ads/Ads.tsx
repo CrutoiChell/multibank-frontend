@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Card, Image, Text, Button, Badge, Group, Stack, Box } from '@mantine/core';
 import { IconExternalLink } from '@tabler/icons-react';
 import { motion } from 'framer-motion';
@@ -13,6 +14,9 @@ interface AdsProps {
 }
 
 export function Ads({ ad, onClose, onLinkClick }: AdsProps) {
+  const [imageError, setImageError] = useState(false);
+  const fallbackImage = 'https://via.placeholder.com/400x200?text=Ad+Image';
+
   const handleLinkClick = () => {
     if (onLinkClick) {
       onLinkClick();
@@ -39,10 +43,10 @@ export function Ads({ ad, onClose, onLinkClick }: AdsProps) {
           {/* Image Section */}
           <Box className={classes.imageContainer}>
             <Image
-              src={ad.image}
+              src={imageError ? fallbackImage : ad.image}
               alt={ad.ads}
               className={classes.image}
-              fallback="https://via.placeholder.com/400x200?text=Ad+Image"
+              onError={() => setImageError(true)}
             />
           </Box>
 
