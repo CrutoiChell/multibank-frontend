@@ -80,4 +80,3 @@ export function Ads({ ad, onClose, onLinkClick }: AdsProps) {
     </motion.div>
   );
 }
-
