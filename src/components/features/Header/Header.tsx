@@ -36,9 +36,13 @@ export function Header() {
 
     const visibleLinks = links.filter(link => {
         if (isAuth) {
+            // Для авторизованных: показываем все, кроме "Войти" и "Регистрация"
             return link.label !== 'Войти' && link.label !== 'Регистрация';
         } else {
-            return link.label !== 'Профиль';
+            // Для неавторизованных: показываем только публичные страницы
+            return link.label !== 'Профиль' && 
+                   link.label !== 'Дашборд' && 
+                   link.label !== 'Аналитика';
         }
     });
 

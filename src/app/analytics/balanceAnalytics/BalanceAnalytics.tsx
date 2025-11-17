@@ -1,6 +1,6 @@
 'use client';
 
-import { Paper, Text, Stack, Divider, Group, Loader, Center } from '@mantine/core';
+import { Paper, Text, Stack, Divider, Group, Loader, Center, Title } from '@mantine/core';
 import { LineChart } from '@mantine/charts';
 import { useState, useEffect, useMemo } from 'react';
 import { BankOverviewResponse, TransactionsStatisticsResponse, useGetTransactionsQuery } from '@/lib/store/api/AuthApi';
@@ -200,19 +200,31 @@ export default function BalanceAnalytics({ selectedBankId, accountsData, statist
   };
 
   return (
-    <div className={styles.analyticsWrapper}>
-      <div className={styles.dividerContainer}>
-        <Text className={styles.transactionsLabel}>Транзакции</Text>
-        <Divider className={styles.dividerLine} />
+    <Stack gap="md">
+      {/* Заголовок секции */}
+      <div>
+        <Title order={3} size="h4" fw={600} mb={4}>
+          Динамика баланса
+        </Title>
+        <Text c="dimmed" size="xs">
+          Изменение баланса за последние месяцы
+        </Text>
       </div>
-      <Paper shadow="lg" radius="lg" className={styles.balanceCard}>
-        <Stack gap="xs" p="md">
-          <Text className={styles.balanceAmount}>
-            {Math.round(currentBalance).toLocaleString()} ₽
-          </Text>
+
+      {/* Карточка с балансом и графиком */}
+      <Paper shadow="sm" radius="md" p="lg" withBorder>
+        <Stack gap="md">
+          <div>
+            <Text size="xs" c="dimmed" fw={500} mb={4}>
+              Текущий баланс
+            </Text>
+            <Text size="xl" fw={700} c="dark">
+              {Math.round(currentBalance).toLocaleString('ru-RU')} ₽
+            </Text>
+          </div>
 
           {/* Показываем график только если есть данные */}
-          {chartData.length > 0 && (
+          {chartData.length > 0 ? (
             <div
               key={selectedBankId || 'all'}
               className={`${isAnimated ? styles.chartVisible : styles.chartHidden} ${styles.chartWrapper}`}
@@ -226,13 +238,13 @@ export default function BalanceAnalytics({ selectedBankId, accountsData, statist
                 </defs>
               </svg>
 
-              <div className={styles.lineChartContainer} style={{ width: '100%', height: '100px', minHeight: '100px', minWidth: '200px' }}>
+              <div className={styles.lineChartContainer} style={{ width: '100%', height: '120px', minHeight: '120px', minWidth: '200px' }}>
                 <LineChart
                   className={styles.lineChart}
-                  h={100}
+                  h={120}
                   w="100%"
                   data={chartData}
-                  style={{ width: '100%', height: '100px' }}
+                  style={{ width: '100%', height: '120px' }}
                   dataKey="month"
                   series={[{ name: 'value', color: CHART_COLOR }]}
                   fillOpacity={0.3}
@@ -252,8 +264,8 @@ export default function BalanceAnalytics({ selectedBankId, accountsData, statist
                   }}
                   xAxisProps={{
                     tick: { 
-                      fill: '#111827', 
-                      fontSize: 12,
+                      fill: '#6b7280', 
+                      fontSize: 11,
                       fontFamily: 'var(--font-inter), sans-serif',
                       fontWeight: 500,
                       letterSpacing: '-0.005em'
@@ -265,82 +277,86 @@ export default function BalanceAnalytics({ selectedBankId, accountsData, statist
                 />
               </div>
             </div>
+          ) : (
+            <Center py="md">
+              <Text size="sm" c="dimmed">
+                Нет данных для отображения
+              </Text>
+            </Center>
           )}
         </Stack>
       </Paper>
-      {/* Показываем секцию транзакций только если есть данные */}
+
+      {/* Секция последних транзакций */}
       {recentTransactions.length > 0 && (
-        <Stack gap="xs" className={styles.transactionsSection}>
-          <Text 
-            size="lg" 
-            fw={600} 
-            c="#000"
-            className={styles.transactionsTitle}
-          >
-            Последние транзакции
-          </Text>
-          {transactionsLoading ? (
-            <Center p="md">
-              <Loader size="sm" />
-            </Center>
-          ) : transactionsError ? (
-            <Center p="md">
-              <Text size="sm" c="red">
-                {process.env.NODE_ENV === 'development' 
-                  ? `Ошибка загрузки: ${transactionsError && 'status' in transactionsError ? transactionsError.status : 'Unknown'}`
-                  : 'Ошибка загрузки транзакций'}
-              </Text>
-            </Center>
-          ) : (
-            <Stack gap="xs" mt="md" className={styles.transactionsList}>
-              {recentTransactions.map((transaction) => {
-                const TransactionIcon = getTransactionIcon(transaction.category, transaction.transactionType);
-                return (
-                  <Group key={transaction.id} justify="space-between" align="center" className={styles.transactionItem}>
-                    <Group gap="sm">
-                      <div 
-                        className={styles.transactionIcon}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          width: '32px',
-                          height: '32px',
-                          borderRadius: '8px',
-                          backgroundColor: transaction.type === 'income' ? '#10b98115' : '#f3f4f6',
-                        }}
-                      >
-                        <TransactionIcon 
-                          size={18} 
-                          color={transaction.type === 'income' ? '#10b981' : '#6b7280'}
+        <div>
+          <div style={{ marginBottom: '12px' }}>
+            <Title order={4} size="h5" fw={600} mb={4}>
+              Последние транзакции
+            </Title>
+            <Text c="dimmed" size="xs">
+              Недавние операции по счетам
+            </Text>
+          </div>
+          <Paper shadow="sm" radius="md" p="md" withBorder>
+            {transactionsLoading ? (
+              <Center p="md">
+                <Loader size="sm" />
+              </Center>
+            ) : transactionsError ? (
+              <Center p="md">
+                <Text size="sm" c="red">
+                  {process.env.NODE_ENV === 'development' 
+                    ? `Ошибка загрузки: ${transactionsError && 'status' in transactionsError ? transactionsError.status : 'Unknown'}`
+                    : 'Ошибка загрузки транзакций'}
+                </Text>
+              </Center>
+            ) : (
+              <Stack gap="xs">
+                {recentTransactions.map((transaction) => {
+                  const TransactionIcon = getTransactionIcon(transaction.category, transaction.transactionType);
+                  return (
+                    <Group key={transaction.id} justify="space-between" align="center" p="xs" style={{ borderRadius: '8px', transition: 'background-color 0.2s' }} className={styles.transactionItem}>
+                      <Group gap="sm">
+                        <div 
                           style={{
-                            transition: 'transform 0.2s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '36px',
+                            height: '36px',
+                            borderRadius: '8px',
+                            backgroundColor: transaction.type === 'income' ? '#10b98115' : '#f3f4f6',
                           }}
-                        />
-                      </div>
+                        >
+                          <TransactionIcon 
+                            size={18} 
+                            color={transaction.type === 'income' ? '#10b981' : '#6b7280'}
+                          />
+                        </div>
+                        <Text 
+                          size="sm" 
+                          fw={500}
+                          c="dark"
+                        >
+                          {transaction.name}
+                        </Text>
+                      </Group>
                       <Text 
                         size="sm" 
-                        fw={500}
-                        className={styles.transactionName}
+                        fw={600}
+                        c={transaction.type === 'income' ? '#10b981' : '#111827'}
                       >
-                        {transaction.name}
+                        {transaction.type === 'income' ? '+' : '-'}{Math.abs(transaction.amount).toLocaleString('ru-RU')} ₽
                       </Text>
                     </Group>
-                    <Text 
-                      size="sm" 
-                      fw={600}
-                      c={transaction.type === 'income' ? '#10b981' : '#000'}
-                      className={styles.transactionAmount}
-                    >
-                      {transaction.type === 'income' ? '+' : '-'}₽ {transaction.amount.toLocaleString()}
-                    </Text>
-                  </Group>
-                );
-              })}
-            </Stack>
-          )}
-        </Stack>
+                  );
+                })}
+              </Stack>
+            )}
+          </Paper>
+        </div>
       )}
-    </div>
+    </Stack>
   );
 }

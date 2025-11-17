@@ -1,6 +1,6 @@
 :root {
-  --card-width: 400px;
-  --container-width: 640px;
+  --card-width: 100%;
+  --card-max-width: 380px;
   --carousel-height: 240px;
   --card-border-radius: 16px;
   --button-size: 34px;
@@ -8,39 +8,12 @@
 
 .cardsWrapper {
   position: relative;
-  display: flex;
-  justify-content: flex-start;
   width: 100%;
 }
 
-.cardContainer {
-  position: relative;
-  width: var(--container-width);
-  min-width: var(--container-width);
-  max-width: 100%;
-  min-height: 600px;
-  background: transparent;
-  border-radius: 12px;
-  overflow: visible;
-  border: none;
-  box-shadow: none;
-}
-
-.cardTitle {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #111827;
-  letter-spacing: -0.01em;
-  font-family: var(--font-inter), sans-serif;
-}
-
-.cardContainer > .mantine-Stack-root,
-.cardContainer > .mantine-Group-root {
-  padding: 16px;
-}
-
 .bankCard {
-  width: var(--card-width);
+  width: 100%;
+  max-width: var(--card-max-width);
   border-radius: var(--card-border-radius);
   padding: 24px;
   color: white;
@@ -54,6 +27,7 @@
   flex-direction: column;
   justify-content: space-between;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .cardPattern {
@@ -186,150 +160,119 @@
 .carouselContainer {
   position: relative;
   width: 100%;
-  height: var(--carousel-height);
+  min-height: var(--carousel-height);
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: visible;
-  margin-bottom: 50px;
+  margin-bottom: 24px;
+  padding: 0 40px;
+  box-sizing: border-box;
 }
 
-.carouselContainer .swiper {
+.swiper {
   width: 100%;
-  height: 100%;
-  overflow: visible;
+  height: var(--carousel-height);
+  overflow: visible !important;
 }
 
-.carouselContainer .swiper-wrapper {
-  overflow: visible;
-}
-
-.carouselContainer .swiper-slide {
-  display: flex;
+.swiper :global(.swiper-wrapper) {
   align-items: center;
-  justify-content: center;
-  height: 100%;
-  touch-action: pan-y;
-  width: auto !important;
-  overflow: visible;
 }
 
-.swiper-button-prev,
-.swiper-button-next {
-  color: rgba(0, 0, 0, 0.75);
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 8px;
-  padding: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  width: var(--button-size);
-  height: var(--button-size);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.swiperSlide {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: auto !important;
+  width: 100% !important;
+  max-width: var(--card-max-width) !important;
+  box-sizing: border-box !important;
 }
 
-.swiper-button-prev {
-  left: calc(50% - (var(--card-width) / 2) - 12px);
+.navButtonPrev,
+.navButtonNext {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  color: #111827 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.2s ease !important;
+  width: 40px !important;
+  height: 40px !important;
 }
 
-.swiper-button-next {
-  display: none !important;
+.navButtonPrev:hover,
+.navButtonNext:hover {
+  background: rgba(255, 255, 255, 1) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-50%) scale(1.05) !important;
 }
 
-.swiper-pagination {
+.navButtonPrev:active,
+.navButtonNext:active {
+  transform: translateY(-50%) scale(0.95) !important;
+}
+
+.navButtonPrev:disabled,
+.navButtonNext:disabled {
+  opacity: 0.4 !important;
+  cursor: not-allowed !important;
+  transform: translateY(-50%) !important;
+}
+
+.navButtonPrev {
+  left: 8px;
+}
+
+.navButtonNext {
+  right: 8px;
+}
+
+.swiperPagination {
   position: absolute !important;
-  bottom: -60px !important;
+  bottom: -40px !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
   margin-top: 0 !important;
   width: auto !important;
 }
 
-.swiper-pagination-bullet {
+.swiperPagination :global(.swiper-pagination-bullet) {
   background: rgba(0, 0, 0, 0.25);
   opacity: 1;
 }
 
-.swiper-pagination-bullet-active {
+.swiperPagination :global(.swiper-pagination-bullet-active) {
   background: #2563eb;
-}
-
-.actionsGroup {
-  width: 400px;
-  margin-left: 105px;
-  margin-top: -50px;
-}
-
-.actionButton {
-  margin-top: 0;
-  background-color: transparent;
-  border-color: #2563eb;
-  color: #2563eb;
 }
 
 @media (max-width: 768px) {
   :root {
-    --container-width: 100%;
-    --card-width: min(340px, calc(100vw - 40px));
+    --card-max-width: min(340px, calc(100vw - 80px));
     --carousel-height: 220px;
   }
 
-  .cardsWrapper {
-    margin-left: 0;
-    padding: 10px;
-    padding-top: 20px;
-    justify-content: center;
-    width: 100%;
-    max-width: 100%;
-    overflow: visible;
-  }
-
-  .cardContainer {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    min-height: 560px;
-    padding: 12px;
-    padding-top: 20px;
-    overflow: visible !important;
-  }
-
-  .swiper-button-prev {
-    left: 8px;
-  }
-
-  .swiper-button-next {
-    right: 8px;
-  }
-
   .carouselContainer {
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow: visible !important;
-    margin-bottom: 30px !important;
-    padding-top: 10px;
-    margin-top: 10px;
+    padding: 0 20px;
+    margin-bottom: 20px;
   }
 
-  .carouselContainer .swiper {
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow: visible !important;
+  .navButtonPrev {
+    left: 4px !important;
+    width: 36px !important;
+    height: 36px !important;
   }
 
-  .carouselContainer .swiper-wrapper {
-    overflow: visible !important;
-  }
-
-  .carouselContainer .swiper-slide {
-    width: var(--card-width) !important;
-    max-width: calc(100vw - 60px) !important;
-    overflow: visible !important;
+  .navButtonNext {
+    right: 4px !important;
+    width: 36px !important;
+    height: 36px !important;
   }
 
   .bankCard {
-    width: 100% !important;
-    max-width: 100% !important;
     padding: 20px;
     min-height: 180px;
   }
@@ -354,88 +297,21 @@
   .cardLabel {
     font-size: 0.65rem;
   }
-
-  .actionsGroup {
-    width: 100% !important;
-    margin-left: 0 !important;
-    margin-top: 16px !important;
-    flex-direction: column !important;
-  }
-
-  .actionButton {
-    width: 100% !important;
-    margin-top: 0 !important;
-  }
-
-  /* Популярные категории - уменьшаем размеры */
-  .cardContainer :global([class*="mantine-Avatar-root"]) {
-    width: 32px !important;
-    height: 32px !important;
-  }
-
-  .cardContainer :global([class*="mantine-Avatar-root"]) svg {
-    width: 16px !important;
-    height: 16px !important;
-  }
-
-  /* Текст категорий на мобильных */
-  .cardContainer :global([class*="mantine-Text-root"]) {
-    font-size: 0.875rem !important;
-  }
 }
 
 /* ОЧЕНЬ МАЛЕНЬКИЕ ЭКРАНЫ */
 @media (max-width: 480px) {
   :root {
-    --card-width: min(300px, calc(100vw - 32px));
+    --card-max-width: min(300px, calc(100vw - 60px));
     --carousel-height: 200px;
   }
 
-  .cardsWrapper {
-    padding: 8px;
-    padding-top: 20px;
-    width: 100%;
-    max-width: 100%;
-    overflow: visible;
-  }
-
-  .cardContainer {
-    width: 100% !important;
-    max-width: 100% !important;
-    padding: 8px;
-    padding-top: 20px;
-    min-height: 520px;
-    overflow: visible !important;
-  }
-
   .carouselContainer {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin-bottom: 20px !important;
-    overflow: visible !important;
-    padding-top: 10px;
-    margin-top: 10px;
-  }
-
-  .carouselContainer .swiper {
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow: visible !important;
-  }
-
-  .carouselContainer .swiper-wrapper {
-    overflow: visible !important;
-  }
-
-  .carouselContainer .swiper-slide {
-    width: var(--card-width) !important;
-    max-width: calc(100vw - 40px) !important;
-    overflow: visible !important;
+    padding: 0 12px;
+    margin-bottom: 16px;
   }
 
   .bankCard {
-    width: 100% !important;
-    max-width: 100% !important;
     padding: 16px;
     min-height: 160px;
   }
@@ -461,11 +337,15 @@
     font-size: 0.6rem;
   }
 
-  .swiper-button-prev {
-    left: 4px;
+  .navButtonPrev {
+    left: 4px !important;
+    width: 32px !important;
+    height: 32px !important;
   }
 
-  .swiper-button-next {
-    right: 4px;
+  .navButtonNext {
+    right: 4px !important;
+    width: 32px !important;
+    height: 32px !important;
   }
 }

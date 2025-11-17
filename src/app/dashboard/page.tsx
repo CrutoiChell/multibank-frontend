@@ -20,6 +20,7 @@ import {
 } from '@mantine/core';
 import {
   IconTrendingUp,
+  IconTrendingDown,
   IconArrowUpRight,
   IconArrowDownRight,
   IconChevronDown,
@@ -46,7 +47,9 @@ import {
   useDeleteBankMutation,
   useLazyGetAccountTransactionsQuery,
 } from '@/lib/store/api/AuthApi';
+import { useGetCurrentUserQuery } from '@/lib/store/api/UserApi';
 import StatisticsChart from './StatisticsChart';
+import Link from 'next/link';
 
 const PAGE_STYLES = {
   background: '#F5F7FA',
@@ -73,6 +76,7 @@ const formatBalance = (balance: string | number | undefined | null, currency: st
 };
 
 export default function Dashboard() {
+  const { isLoading: authLoading, isSuccess: authOk } = useGetCurrentUserQuery();
 
   const [consentModalOpen, setConsentModalOpen] = useState(false);
   const [selectedBank, setSelectedBank] = useState<string | null>(null);
@@ -399,6 +403,68 @@ export default function Dashboard() {
     return { income, expense };
   }, [allTransactions, statisticsData]);
 
+  const savingsChangePercent = useMemo(() => {
+    if (!statisticsData?.monthlyStats || !Array.isArray(statisticsData.monthlyStats) || statisticsData.monthlyStats.length < 2) {
+      return null;
+    }
+
+    const sortedStats = [...statisticsData.monthlyStats].sort((a, b) => {
+      const parseMonth = (monthStr: string): Date => {
+        const monthNames: Record<string, number> = {
+          'январь': 0, 'февраль': 1, 'март': 2, 'апрель': 3, 'май': 4, 'июнь': 5,
+          'июль': 6, 'август': 7, 'сентябрь': 8, 'октябрь': 9, 'ноябрь': 10, 'декабрь': 11
+        };
+        
+        const parts = monthStr.toLowerCase().split(' ');
+        const monthName = parts[0];
+        const year = parseInt(parts[1]) || new Date().getFullYear();
+        const monthIndex = monthNames[monthName] ?? 0;
+        
+        return new Date(year, monthIndex, 1);
+      };
+
+      const dateA = parseMonth(a.month || '');
+      const dateB = parseMonth(b.month || '');
+      
+      return dateB.getTime() - dateA.getTime();
+    });
+
+    const currentMonth = sortedStats[0];
+    const previousMonth = sortedStats[1];
+
+    if (!currentMonth || !previousMonth) {
+      return null;
+    }
+
+    // Рассчитываем чистый доход (доходы - расходы) для обоих месяцев
+    const currentNetIncome = (currentMonth.income || 0) - (currentMonth.expenses || 0);
+    const previousNetIncome = (previousMonth.income || 0) - (previousMonth.expenses || 0);
+
+    // Вычисляем предполагаемый баланс предыдущего месяца
+    // Текущий баланс минус чистый доход текущего месяца = баланс на начало месяца
+    const previousMonthBalance = totalBalance - currentNetIncome;
+    
+    // Если баланс предыдущего месяца отрицательный или нулевой, не можем рассчитать процент
+    if (previousMonthBalance <= 0) {
+      return null;
+    }
+
+    // Сбережения = 10% от баланса
+    const currentSavings = totalBalance * 0.1;
+    const previousSavings = previousMonthBalance * 0.1;
+
+    // Если сбережения предыдущего месяца были нулевыми
+    if (previousSavings <= 0) {
+      return currentSavings > 0 ? 100 : 0;
+    }
+
+    // Рассчитываем процент изменения сбережений
+    const percentChange = ((currentSavings - previousSavings) / previousSavings) * 100;
+    
+    // Округляем до 2 знаков после запятой
+    return Math.round(percentChange * 100) / 100;
+  }, [statisticsData, totalBalance]);
+
   const banksList = useMemo(() => {
     if (!banksData?.banks) return [];
     const filtered = banksData.banks.filter((bankId) =>
@@ -590,6 +656,36 @@ export default function Dashboard() {
     }
   };
 
+  if (authLoading) {
+    return (
+      <Container size="xl" py="xl">
+        <Center h={400}>
+          <Stack align="center" gap="md">
+            <Loader size="lg" />
+            <Text c="dimmed">Загрузка...</Text>
+          </Stack>
+        </Center>
+      </Container>
+    );
+  }
+
+  if (!authOk && !authLoading) {
+    return (
+      <Container size="xl" py="xl">
+        <Center h={"70dvh"}>
+          <Stack align="center" gap="md">
+            <Title order={2}>Пожалуйста, авторизуйтесь</Title>
+            <Text c="dimmed">Для доступа к дашборду нужен вход в систему</Text>
+            <Group>
+              <Button component={Link as any} href="/login">Войти</Button>
+              <Button variant="light" component={Link as any} href="/registration">Регистрация</Button>
+            </Group>
+          </Stack>
+        </Center>
+      </Container>
+    );
+  }
+
   return (
     <Container size="xl" py="xl" style={{ maxWidth: '1400px', margin: '0 auto' }}>
       <Stack gap="lg">
@@ -684,10 +780,25 @@ export default function Dashboard() {
                       </Title>
                     </div>
                     <Group gap="xs" mt="auto">
-                      <IconTrendingUp size={16} color={PAGE_STYLES.successGreen} />
-                      <Text size="xs" c={PAGE_STYLES.textSecondary}>
-                        +2.36% за месяц
-                      </Text>
+                      {savingsChangePercent !== null ? (
+                        <>
+                          {savingsChangePercent >= 0 ? (
+                            <IconTrendingUp size={16} color={PAGE_STYLES.successGreen} />
+                          ) : (
+                            <IconTrendingDown size={16} color="#EF4444" />
+                          )}
+                          <Text size="xs" c={savingsChangePercent >= 0 ? PAGE_STYLES.successGreen : "#EF4444"}>
+                            {savingsChangePercent >= 0 ? '+' : ''}{savingsChangePercent.toFixed(2)}% за месяц
+                          </Text>
+                        </>
+                      ) : (
+                        <>
+                          <IconTrendingUp size={16} color={PAGE_STYLES.textSecondary} />
+                          <Text size="xs" c={PAGE_STYLES.textSecondary}>
+                            Нет данных
+                          </Text>
+                        </>
+                      )}
                     </Group>
                   </Stack>
                 </Card>

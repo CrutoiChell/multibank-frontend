@@ -1,15 +1,14 @@
 'use client';
 
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { Paper, Text, Stack, Group, Button, Title, Divider, Badge, Avatar, Loader, Center } from '@mantine/core';
-import { IconCreditCard, IconEye, IconEyeOff, IconShoppingCart, IconCar, IconPlane, IconBuilding, IconPizza, IconWallet, IconCoins } from '@tabler/icons-react';
+import { Paper, Text, Stack, Group, Button, Title, Divider, Badge, Avatar, Loader, Center, ActionIcon } from '@mantine/core';
+import { IconCreditCard, IconEye, IconEyeOff, IconShoppingCart, IconCar, IconPlane, IconBuilding, IconPizza, IconWallet, IconCoins, IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Swiper as SwiperType } from 'swiper';
-import { Navigation, Pagination, Keyboard, A11y } from 'swiper/modules';
+import { Pagination, Keyboard, A11y } from 'swiper/modules';
 import { useRouter } from 'next/navigation';
 import { BankOverviewResponse, useGetTransactionsStatisticsQuery, useGetCategoriesQuery } from '@/lib/store/api/AuthApi';
 import 'swiper/css';
-import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import styles from './Cards.module.css';
 
@@ -212,67 +211,37 @@ export default function Cards({ accountsData, onCardChange, selectedBankId }: Ca
   
   return (
     <div className={styles.cardsWrapper}>
-      <Paper shadow="lg" radius="lg" className={styles.cardContainer}>
-        <Group justify="space-between" align="center" p="md" pb="xs">
-          <Group gap="sm" align="center">
-            <Title order={4} className={styles.cardTitle}>Банковские карты</Title>
-            <Badge
+      <Stack gap="md">
+        {cardsData.length === 0 ? (
+          <Center p="xl">
+            <Text c="dimmed" size="sm">Нет доступных счетов</Text>
+          </Center>
+        ) : (
+          <div className={styles.carouselContainer}>
+            <ActionIcon
+              variant="filled"
               size="lg"
-              radius="xl"
-              variant="light"
-              color="blue"
-              style={{
-                width: '28px',
-                height: '28px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 600,
-                fontSize: '14px',
-                padding: 0,
-                borderRadius: '50%',
-              }}
+              radius="md"
+              className={styles.navButtonPrev}
+              onClick={() => swiperRef.current?.slidePrev()}
+              disabled={cardsData.length <= 1}
             >
-              {cardsData.length || accountsData?.totalAccounts || 0}
-            </Badge>
-          </Group>
-          <Group gap="xs">
-            <Button
-              size="xs"
-              variant="subtle"
-              color="gray"
-              leftSection={isCardVisible ? <IconEyeOff size={14} /> : <IconEye size={14} />}
-              onClick={toggleCardVisibility}
-            >
-              {isCardVisible ? 'Скрыть' : 'Показать'}
-            </Button>
-          </Group>
-        </Group>
-
-        <Divider mx="md" />
-
-        <Stack gap="md" p="md">
-          {cardsData.length === 0 ? (
-            <Center p="xl">
-              <Text c="dimmed" size="sm">Нет доступных счетов</Text>
-            </Center>
-          ) : (
-            <div className={styles.carouselContainer}>
-              <Swiper
-              modules={[Navigation, Pagination, Keyboard, A11y]}
+              <IconChevronLeft size={20} stroke={2.5} />
+            </ActionIcon>
+            <Swiper
+              modules={[Pagination, Keyboard, A11y]}
               onSwiper={(swiper) => (swiperRef.current = swiper)}
               onSlideChange={handleSlideChange}
               slidesPerView={1}
               spaceBetween={16}
-              navigation
               loop={false}
               keyboard={{ enabled: true }}
               a11y={{ enabled: true }}
               touchStartPreventDefault={false}
-              style={{ height: SWIPER_HEIGHT }}
+              className={styles.swiper}
             >
               {cardsData.map((card, index) => (
-                <SwiperSlide key={`${card.id}-${index}`}>
+                <SwiperSlide key={`${card.id}-${index}`} className={styles.swiperSlide}>
                   <div className={styles.bankCard} style={{ background: getBankCardColor(card.bankId) }}>
                     <div className={styles.cardPattern} />
                     <div className={styles.cardGeometricPattern} />
@@ -319,90 +288,87 @@ export default function Cards({ accountsData, onCardChange, selectedBankId }: Ca
                   </div>
                 </SwiperSlide>
               ))}
-              </Swiper>
-              <div className="swiper-pagination"></div>
-            </div>
-          )}
-
-          <Group gap="xs" grow className={styles.actionsGroup}>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className={styles.actionButton}
-              onClick={() => router.push('/dashboard')}
+            </Swiper>
+            <ActionIcon
+              variant="filled"
+              size="lg"
+              radius="md"
+              className={styles.navButtonNext}
+              onClick={() => swiperRef.current?.slideNext()}
+              disabled={cardsData.length <= 1}
             >
-              История операций
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className={styles.actionButton}
-              onClick={() => router.push('/dashboard')}
-            >
-              Добавить карту
-            </Button>
-          </Group>
+              <IconChevronRight size={20} stroke={2.5} />
+            </ActionIcon>
+            <div className={styles.swiperPagination}></div>
+          </div>
+        )}
 
-          {/* Показываем секцию популярных категорий только если есть данные */}
-          {popularCategories.length > 0 && (
-            <Stack gap="xs" mt="md">
-              <Text 
-                size="lg" 
-                fw={600} 
-                c="#000"
-                style={{ 
-                  fontFamily: 'var(--font-inter), sans-serif',
-                  letterSpacing: '-0.01em'
-                }}
-              >
-                Популярные категории
-              </Text>
-              <Stack gap="xs" mt="md">
-                {popularCategories.map((category) => {
-                  const IconComponent = category.icon;
-                  return (
-                    <Group key={category.id} justify="space-between" align="center">
-                      <Group gap="sm">
-                        <Avatar 
-                          size={40} 
-                          radius="xl" 
-                          style={{ 
-                            backgroundColor: `${category.color}15`,
-                            border: `1px solid ${category.color}30`,
-                          }}
-                        >
-                          <IconComponent size={20} color={category.color} />
-                        </Avatar>
-                        <Text 
-                          size="sm" 
-                          fw={500}
-                          style={{ 
-                            fontFamily: 'var(--font-inter), sans-serif',
-                            letterSpacing: '-0.005em',
-                          }}
-                        >
-                          {category.name}
-                        </Text>
-                      </Group>
-                      <Text 
-                        size="sm" 
-                        fw={600}
+        <Group gap="xs" grow>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => router.push('/dashboard')}
+          >
+            История операций
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => router.push('/dashboard')}
+          >
+            Добавить карту
+          </Button>
+        </Group>
+
+        {/* Показываем секцию популярных категорий только если есть данные */}
+        {popularCategories.length > 0 && (
+          <Stack gap="xs" mt="md">
+            <Text 
+              size="sm" 
+              fw={600} 
+              c="dark"
+            >
+              Популярные категории
+            </Text>
+            <Stack gap="xs">
+              {popularCategories.map((category) => {
+                const IconComponent = category.icon;
+                return (
+                  <Group key={category.id} justify="space-between" align="center">
+                    <Group gap="sm">
+                      <Avatar 
+                        size={36} 
+                        radius="md" 
                         style={{ 
-                          fontFamily: 'var(--font-mono), monospace',
-                          letterSpacing: '-0.01em',
-                          fontFeatureSettings: "'tnum', 'lnum'",
+                          backgroundColor: `${category.color}15`,
+                          border: `1px solid ${category.color}30`,
                         }}
                       >
-                        {category.amount}
+                        <IconComponent size={18} color={category.color} />
+                      </Avatar>
+                      <Text 
+                        size="sm" 
+                        fw={500}
+                      >
+                        {category.name}
                       </Text>
                     </Group>
-                  );
-                })}
-              </Stack>
+                    <Text 
+                      size="sm" 
+                      fw={600}
+                      style={{ 
+                        fontFamily: 'var(--font-mono), monospace',
+                      }}
+                    >
+                      {category.amount}
+                    </Text>
+                  </Group>
+                );
+              })}
             </Stack>
-          )}
-        </Stack>
-      </Paper>
+          </Stack>
+        )}
+      </Stack>
     </div>
   );
 }
