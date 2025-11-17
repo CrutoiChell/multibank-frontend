@@ -1,35 +1,36 @@
-"use client";
+'use client';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { 
-  ActionIcon, 
-  Textarea, 
-  Button, 
-  Paper, 
-  Text, 
-  ScrollArea, 
-  Group, 
+import {
+  ActionIcon,
+  Textarea,
+  Button,
+  Paper,
+  Text,
+  ScrollArea,
+  Group,
   Stack,
   Loader,
   Box,
-  Badge
+  Badge,
 } from '@mantine/core';
-import { 
-  IconMessageCircle, 
-  IconX, 
-  IconMinus, 
+import {
+  IconMessageCircle,
+  IconX,
+  IconMinus,
   IconMaximize,
   IconSend,
   IconRobot,
-  IconUser
+  IconUser,
+  IconCrown,
 } from '@tabler/icons-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   useGetFinancialAdviceMutation,
   useGetRecommendationsQuery,
   useMarkRecommendationAsReadMutation,
   useDeleteAllRecommendationsMutation,
   useGetRelevantAdMutation,
-  type Recommendation
+  type Recommendation,
 } from '@/lib/store/api/AiApi';
 import { notifications } from '@mantine/notifications';
 import classes from './AiChat.module.css';
@@ -37,6 +38,7 @@ import { useGetCurrentUserQuery } from '@/lib/store/api/UserApi';
 import { formatMarkdown } from '@/lib/utils/formatMarkdown';
 import { useGetUserAdsQuery } from '@/lib/store/api/AdsApi';
 import type { Ad } from '@/lib/store/api/AdsApi';
+import { PremiumModal } from './PremiumModal';
 
 interface ChatMessage {
   id: string;
@@ -66,21 +68,28 @@ export function AiChat() {
   const scrollViewportRef = useRef<HTMLDivElement>(null);
   const readMessagesRef = useRef<Set<number>>(new Set());
   const [isClearing, setIsClearing] = useState(false);
-  const [lastAd, setLastAd] = useState<{ id: number; ads: string; url: string } | null>(null);
-  
+  const [lastAd, setLastAd] = useState<{
+    id: number;
+    ads: string;
+    url: string;
+  } | null>(null);
+
+  // Premium subscription state (temporary: hardcoded, will be replaced with API call)
+  const [isPremium, setIsPremium] = useState(true);
+  const [responseCount, setResponseCount] = useState(0);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+
   // Check if user is authenticated
   const { isSuccess: isAuthenticated } = useGetCurrentUserQuery();
-  
+
   // Load recommendations from API (always when authenticated, to show unread count)
-  const { data: recommendations, refetch: refetchRecommendations } = useGetRecommendationsQuery(
-    undefined,
-    { skip: !isAuthenticated }
-  );
+  const { data: recommendations, refetch: refetchRecommendations } =
+    useGetRecommendationsQuery(undefined, { skip: !isAuthenticated });
 
   // Load user ads
   const { data: userAdsData, refetch: refetchUserAds } = useGetUserAdsQuery(
     undefined,
-    { skip: !isAuthenticated }
+    { skip: !isAuthenticated },
   );
 
   // Обрабатываем рекламы пользователя и показываем последнюю
@@ -97,19 +106,19 @@ export function AiChat() {
       // Выбираем рекламу по lastViewedAt (самая новая или null)
       if (adsArray.length > 0) {
         const selectedAd = adsArray
-          .filter(ad => ad) // Фильтруем пустые значения
+          .filter((ad) => ad) // Фильтруем пустые значения
           .sort((a, b) => {
             // Сначала рекламы без lastViewedAt (null или undefined)
             if (!a.lastViewedAt && !b.lastViewedAt) return 0;
             if (!a.lastViewedAt) return -1; // a идет первым
             if (!b.lastViewedAt) return 1; // b идет первым
-            
+
             // Затем сортируем по lastViewedAt (самая новая первая)
             const dateA = new Date(a.lastViewedAt).getTime();
             const dateB = new Date(b.lastViewedAt).getTime();
             return dateB - dateA; // Обратный порядок - самая новая первая
           })[0]; // Берем первую (самую новую или без lastViewedAt)
-        
+
         if (selectedAd) {
           setLastAd({
             id: selectedAd.id,
@@ -122,19 +131,25 @@ export function AiChat() {
   }, [userAdsData]);
 
   // Convert recommendations to chat messages
-  const convertRecommendationsToMessages = useCallback((recs: Recommendation[]): ChatMessage[] => {
-    // Создаем копию массива перед сортировкой, чтобы не мутировать read-only массив
-    return [...recs]
-      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-      .map((rec) => ({
-        id: `rec-${rec.id}`,
-        role: 'assistant' as const,
-        content: rec.content,
-        timestamp: new Date(rec.createdAt),
-        recommendationId: rec.id,
-        isRead: rec.isRead,
-      }));
-  }, []);
+  const convertRecommendationsToMessages = useCallback(
+    (recs: Recommendation[]): ChatMessage[] => {
+      // Создаем копию массива перед сортировкой, чтобы не мутировать read-only массив
+      return [...recs]
+        .sort(
+          (a, b) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+        )
+        .map((rec) => ({
+          id: `rec-${rec.id}`,
+          role: 'assistant' as const,
+          content: rec.content,
+          timestamp: new Date(rec.createdAt),
+          recommendationId: rec.id,
+          isRead: rec.isRead,
+        }));
+    },
+    [],
+  );
 
   // Load user questions from localStorage (only user messages, not AI responses)
   useEffect(() => {
@@ -146,12 +161,15 @@ export function AiChat() {
           .filter((msg: any) => msg.role === 'user')
           .map((msg: any) => ({
             ...msg,
-            timestamp: new Date(msg.timestamp)
+            timestamp: new Date(msg.timestamp),
           }));
         setMessages((prev) => {
           // Merge with recommendations, but keep user messages from localStorage
-          const existingIds = new Set(prev.map(m => m.id));
-          return [...prev, ...userMessages.filter((m: ChatMessage) => !existingIds.has(m.id))];
+          const existingIds = new Set(prev.map((m) => m.id));
+          return [
+            ...prev,
+            ...userMessages.filter((m: ChatMessage) => !existingIds.has(m.id)),
+          ];
         });
       }
     } catch (error) {
@@ -166,44 +184,49 @@ export function AiChat() {
       setMessages((prev) => {
         // Create a map of existing messages by recommendationId (for assistant messages)
         // and by id (for all messages)
-        const existingById = new Map(prev.map(m => [m.id, m]));
+        const existingById = new Map(prev.map((m) => [m.id, m]));
         const existingByRecId = new Map<number, ChatMessage>();
-        prev.forEach(m => {
+        prev.forEach((m) => {
           if (m.recommendationId) {
             existingByRecId.set(m.recommendationId, m);
           }
         });
 
         // Filter out recommendations that already exist
-        const newRecMessages = recMessages.filter(m => 
-          !existingById.has(m.id) && 
-          (!m.recommendationId || !existingByRecId.has(m.recommendationId))
+        const newRecMessages = recMessages.filter(
+          (m) =>
+            !existingById.has(m.id) &&
+            (!m.recommendationId || !existingByRecId.has(m.recommendationId)),
         );
-        
+
         // НЕ запрашиваем relevant-by-advice при загрузке рекомендаций из API
         // Запрос relevant-by-advice делается только один раз при отправке нового сообщения в чате
         // через /api/ai/financial-advice
-        
+
         // Update existing recommendations with latest data (e.g., isRead status)
-        const updated = prev.map(m => {
+        const updated = prev.map((m) => {
           if (m.recommendationId) {
-            const rec = recommendations.find(r => r.id === m.recommendationId);
+            const rec = recommendations.find(
+              (r) => r.id === m.recommendationId,
+            );
             if (rec) {
               return { ...m, isRead: rec.isRead, content: rec.content };
             }
           }
           return m;
         });
-        
+
         // Combine and sort by timestamp
         const combined = [...updated, ...newRecMessages];
-        const sorted = combined.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
-        
+        const sorted = combined.sort(
+          (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+        );
+
         // Если появились новые рекомендации, сбрасываем isLoading
         if (newRecMessages.length > 0) {
           setIsLoading(false);
         }
-        
+
         return sorted;
       });
     }
@@ -211,12 +234,12 @@ export function AiChat() {
 
   // Calculate unread count
   const unreadCount = messages.filter(
-    msg => msg.role === 'assistant' && !msg.isRead && msg.recommendationId
+    (msg) => msg.role === 'assistant' && !msg.isRead && msg.recommendationId,
   ).length;
 
   // Save only user messages to localStorage
   useEffect(() => {
-    const userMessages = messages.filter(msg => msg.role === 'user');
+    const userMessages = messages.filter((msg) => msg.role === 'user');
     if (userMessages.length > 0) {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(userMessages));
@@ -232,7 +255,7 @@ export function AiChat() {
 
     const viewport = scrollViewportRef.current;
     let scrollTimeout: NodeJS.Timeout;
-    
+
     const handleScroll = () => {
       // Debounce scroll events
       clearTimeout(scrollTimeout);
@@ -245,17 +268,21 @@ export function AiChat() {
         if (scrollHeight - scrollTop - clientHeight < 50) {
           // Find unread messages with recommendationId
           const unreadMessages = messages.filter(
-            msg => msg.role === 'assistant' && 
-            msg.recommendationId && 
-            !msg.isRead &&
-            !readMessagesRef.current.has(msg.recommendationId)
+            (msg) =>
+              msg.role === 'assistant' &&
+              msg.recommendationId &&
+              !msg.isRead &&
+              !readMessagesRef.current.has(msg.recommendationId),
           );
 
           // Mark all visible unread messages as read
           if (unreadMessages.length > 0) {
             Promise.all(
               unreadMessages.map(async (msg) => {
-                if (msg.recommendationId && !readMessagesRef.current.has(msg.recommendationId)) {
+                if (
+                  msg.recommendationId &&
+                  !readMessagesRef.current.has(msg.recommendationId)
+                ) {
                   readMessagesRef.current.add(msg.recommendationId);
                   try {
                     await markAsRead(msg.recommendationId).unwrap();
@@ -267,15 +294,17 @@ export function AiChat() {
                   }
                 }
                 return null;
-              })
+              }),
             ).then((markedIds) => {
               // Update messages that were successfully marked as read
-              const successIds = markedIds.filter(id => id !== null) as string[];
+              const successIds = markedIds.filter(
+                (id) => id !== null,
+              ) as string[];
               if (successIds.length > 0) {
                 setMessages((prev) =>
                   prev.map((m) =>
-                    successIds.includes(m.id) ? { ...m, isRead: true } : m
-                  )
+                    successIds.includes(m.id) ? { ...m, isRead: true } : m,
+                  ),
                 );
                 // Refetch recommendations to update the list
                 refetchRecommendations();
@@ -306,9 +335,21 @@ export function AiChat() {
         notifications.show({
           color: 'yellow',
           title: 'Требуется авторизация',
-          message: 'Пожалуйста, войдите в систему для использования Ивана Банкова',
+          message:
+            'Пожалуйста, войдите в систему для использования Ивана Банкова',
         });
       }
+      return;
+    }
+
+    // Check premium limit for non-premium users
+    if (!isPremium && responseCount >= 1) {
+      notifications.show({
+        color: 'yellow',
+        title: 'Премиум подписка',
+        message: 'Для продолжения использования приобретите премиум подписку',
+      });
+      setShowPremiumModal(true);
       return;
     }
 
@@ -331,28 +372,35 @@ export function AiChat() {
     try {
       const response = await getFinancialAdvice({ prompt }).unwrap();
       hasReceivedResponse = true;
-      
+
       // Извлекаем данные из нового формата ответа
       const advice = response.message || response.advice || '';
-      const recommendationId = response.recommendation?.id || response.recommendationId;
-      
-      console.log('AiChat: response structure', { 
-        hasRecommendation: !!response.recommendation, 
+      const recommendationId =
+        response.recommendation?.id || response.recommendationId;
+
+      console.log('AiChat: response structure', {
+        hasRecommendation: !!response.recommendation,
         recommendationId,
         hasMessage: !!response.message,
-        hasAdvice: !!response.advice 
+        hasAdvice: !!response.advice,
       });
-      
+
       // Проверяем, что ответ не пустой
-      if (!advice || advice.trim() === '' || advice.trim() === 'Извините, не удалось получить ответ.') {
-        console.log('AiChat: empty or error advice in response, waiting for recommendations');
+      if (
+        !advice ||
+        advice.trim() === '' ||
+        advice.trim() === 'Извините, не удалось получить ответ.'
+      ) {
+        console.log(
+          'AiChat: empty or error advice in response, waiting for recommendations',
+        );
         // Не показываем ошибку, ждем ответ через recommendations
         setIsLoading(false);
         // Refetch recommendations чтобы получить ответ
         refetchRecommendations();
         return;
       }
-      
+
       const assistantMessage: ChatMessage = {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
@@ -364,16 +412,41 @@ export function AiChat() {
 
       setMessages((prev) => [...prev, assistantMessage]);
       setIsLoading(false);
-      
+
+      // Premium logic: increment response count and show modal after first response
+      if (!isPremium) {
+        const newResponseCount = responseCount + 1;
+        setResponseCount(newResponseCount);
+
+        // Show premium modal after first response
+        if (newResponseCount === 1) {
+          // Delay modal to let user see the response first
+          setTimeout(() => {
+            setShowPremiumModal(true);
+          }, 1000);
+        }
+      }
+
       // СРАЗУ отправляем запрос на /ads/relevant-by-advice с recommendationId (только если ответ не пустой)
       console.log('AiChat: recommendationId', recommendationId);
-      console.log('AiChat: requestedAdsRef.current', Array.from(requestedAdsRef.current));
+      console.log(
+        'AiChat: requestedAdsRef.current',
+        Array.from(requestedAdsRef.current),
+      );
       console.log('AiChat: has recommendationId?', !!recommendationId);
-      console.log('AiChat: already requested?', recommendationId ? requestedAdsRef.current.has(recommendationId) : false);
-      
+      console.log(
+        'AiChat: already requested?',
+        recommendationId
+          ? requestedAdsRef.current.has(recommendationId)
+          : false,
+      );
+
       if (recommendationId && !requestedAdsRef.current.has(recommendationId)) {
         requestedAdsRef.current.add(recommendationId);
-        console.log('AiChat: requesting ad for recommendation', recommendationId);
+        console.log(
+          'AiChat: requesting ad for recommendation',
+          recommendationId,
+        );
         // Запрашиваем рекламу асинхронно, не блокируя UI
         // Это единственное место, где запрашивается relevant-by-advice
         getRelevantAd({ recommendationId: recommendationId })
@@ -388,15 +461,15 @@ export function AiChat() {
                 ads: ad.ads,
                 url: ad.url || '#',
               });
-              
+
               // Сохраняем рекламу в localStorage для AdsModal
               try {
                 // Получаем существующие рекламы из localStorage
                 const savedAds = localStorage.getItem(ADS_STORAGE_KEY);
                 let adsArray: Ad[] = savedAds ? JSON.parse(savedAds) : [];
-                
+
                 // Проверяем, нет ли уже этой рекламы в массиве
-                const existingIndex = adsArray.findIndex(a => a.id === ad.id);
+                const existingIndex = adsArray.findIndex((a) => a.id === ad.id);
                 if (existingIndex >= 0) {
                   // Обновляем существующую рекламу
                   adsArray[existingIndex] = ad;
@@ -404,13 +477,18 @@ export function AiChat() {
                   // Добавляем новую рекламу в конец массива
                   adsArray.push(ad);
                 }
-                
+
                 // Сохраняем обновленный массив в localStorage
                 localStorage.setItem(ADS_STORAGE_KEY, JSON.stringify(adsArray));
-                console.log('AiChat: saved ad to localStorage', { ad, adsArray });
-                
+                console.log('AiChat: saved ad to localStorage', {
+                  ad,
+                  adsArray,
+                });
+
                 // Отправляем событие для обновления AdsModal
-                window.dispatchEvent(new CustomEvent('new-ad-received', { detail: ad }));
+                window.dispatchEvent(
+                  new CustomEvent('new-ad-received', { detail: ad }),
+                );
                 // Также отправляем событие об обновлении localStorage
                 window.dispatchEvent(new CustomEvent('localStorage-updated'));
               } catch (error) {
@@ -428,31 +506,40 @@ export function AiChat() {
             }
           });
       } else {
-        console.log('AiChat: NOT requesting ad - recommendationId:', recommendationId, 'already requested:', recommendationId ? requestedAdsRef.current.has(recommendationId) : false);
+        console.log(
+          'AiChat: NOT requesting ad - recommendationId:',
+          recommendationId,
+          'already requested:',
+          recommendationId
+            ? requestedAdsRef.current.has(recommendationId)
+            : false,
+        );
       }
-      
+
       // Refetch recommendations to get updated list
       refetchRecommendations();
     } catch (error: any) {
       console.error('Error getting financial advice:', error);
-      
+
       // Не показываем ошибку сразу, если это может быть таймаут
       // Ответ может прийти позже через recommendations
       // Проверяем, есть ли уже ответ через recommendations
-      const hasRecommendation = recommendations?.some(rec => 
-        rec.content && rec.content.trim() !== ''
+      const hasRecommendation = recommendations?.some(
+        (rec) => rec.content && rec.content.trim() !== '',
       );
-      
+
       // Если есть рекомендация с контентом, не показываем ошибку
       if (hasRecommendation) {
-        console.log('AdsModal: recommendation already exists, not showing error');
+        console.log(
+          'AdsModal: recommendation already exists, not showing error',
+        );
         setIsLoading(false);
         return;
       }
-      
+
       let errorMessage = 'Не удалось получить финансовый совет';
       let showInChat = false;
-      
+
       // Если есть сообщение от сервера, используем его
       if (error?.data?.message) {
         errorMessage = error.data.message;
@@ -462,28 +549,38 @@ export function AiChat() {
         errorMessage = 'Требуется авторизация. Пожалуйста, войдите в систему.';
       } else if (error?.status === 404 && !error?.data?.message) {
         // Только если это настоящая 404 без сообщения
-        errorMessage = 'Эндпоинт не найден. Убедитесь, что сервер запущен и перезапустите dev сервер.';
+        errorMessage =
+          'Эндпоинт не найден. Убедитесь, что сервер запущен и перезапустите dev сервер.';
       } else if (error?.status === 500) {
         errorMessage = 'Ошибка сервера. Попробуйте позже.';
         showInChat = true;
       } else {
         // Для других ошибок (таймаут и т.д.) не показываем ошибку сразу
         // Ответ может прийти позже через recommendations
-        console.log('AdsModal: request may be processing, waiting for recommendations');
+        console.log(
+          'AdsModal: request may be processing, waiting for recommendations',
+        );
         setIsLoading(false);
         // Продолжаем ждать ответ через recommendations
         return;
       }
 
       // Показываем уведомление только для критических ошибок
-      if (error?.status === 401 || (error?.status === 404 && !error?.data?.message)) {
+      if (
+        error?.status === 401 ||
+        (error?.status === 404 && !error?.data?.message)
+      ) {
         notifications.show({
-          color: error?.status === 404 && error?.data?.message ? 'yellow' : 'red',
-          title: error?.status === 404 && error?.data?.message ? 'Информация' : 'Ошибка',
+          color:
+            error?.status === 404 && error?.data?.message ? 'yellow' : 'red',
+          title:
+            error?.status === 404 && error?.data?.message
+              ? 'Информация'
+              : 'Ошибка',
           message: errorMessage,
         });
       }
-      
+
       // Показываем сообщение в чате только для бизнес-логики
       if (showInChat) {
         const errorMsg: ChatMessage = {
@@ -509,6 +606,8 @@ export function AiChat() {
       requestedAdsRef.current.clear();
       // Очищаем последнюю рекламу
       setLastAd(null);
+      // Сбрасываем счетчик ответов для не-премиум пользователей
+      setResponseCount(0);
       localStorage.removeItem(STORAGE_KEY);
       notifications.show({
         color: 'blue',
@@ -526,6 +625,8 @@ export function AiChat() {
       requestedAdsRef.current.clear();
       // Очищаем последнюю рекламу
       setLastAd(null);
+      // Сбрасываем счетчик ответов для не-премиум пользователей
+      setResponseCount(0);
       await deleteAllRecommendations().unwrap();
       localStorage.removeItem(STORAGE_KEY);
       notifications.show({
@@ -616,7 +717,7 @@ export function AiChat() {
           >
             <motion.div
               initial={{ scale: 0.8, y: 20, opacity: 0 }}
-              animate={{ 
+              animate={{
                 scale: isMinimized ? 0.95 : 1,
                 y: isMinimized ? 40 : 0,
                 opacity: 1,
@@ -630,15 +731,43 @@ export function AiChat() {
                 shadow="xl"
                 radius="md"
                 className={classes.chatPaper}
-                style={{ height: isMinimized ? 'auto' : '600px', minHeight: isMinimized ? 'auto' : '600px' }}
+                style={{
+                  height: isMinimized ? 'auto' : '600px',
+                  minHeight: isMinimized ? 'auto' : '600px',
+                }}
               >
                 {/* Header */}
-                <Group justify="space-between" p="md" className={classes.chatHeader}>
+                <Group
+                  justify="space-between"
+                  p="md"
+                  className={classes.chatHeader}
+                >
                   <Group gap="xs">
                     <IconRobot size={24} color="#1e3a8a" />
                     <div>
-                      <Text fw={600} size="lg">Иван Банков</Text>
-                      <Text size="xs" c="dimmed">Ai agent</Text>
+                      <Group gap="xs" align="center">
+                        <Text fw={600} size="lg">
+                          Иван Банков
+                        </Text>
+                        {isPremium && (
+                          <Badge
+                            leftSection={<IconCrown size={12} />}
+                            variant="gradient"
+                            gradient={{ from: '#FFD700', to: '#FFA500' }}
+                            size="sm"
+                          >
+                            Premium
+                          </Badge>
+                        )}
+                        {!isPremium && (
+                          <Badge variant="light" color="gray" size="sm">
+                            Обычный
+                          </Badge>
+                        )}
+                      </Group>
+                      <Text size="xs" c="dimmed">
+                        Ai agent
+                      </Text>
                     </div>
                   </Group>
                   <Group gap="xs">
@@ -657,7 +786,11 @@ export function AiChat() {
                       onClick={() => setIsMinimized(!isMinimized)}
                       title={isMinimized ? 'Развернуть' : 'Свернуть'}
                     >
-                      {isMinimized ? <IconMaximize size={18} /> : <IconMinus size={18} />}
+                      {isMinimized ? (
+                        <IconMaximize size={18} />
+                      ) : (
+                        <IconMinus size={18} />
+                      )}
                     </ActionIcon>
                     <ActionIcon
                       variant="subtle"
@@ -671,9 +804,9 @@ export function AiChat() {
                 {!isMinimized && (
                   <>
                     {/* Messages Area */}
-                    <ScrollArea 
-                      h={400} 
-                      p="md" 
+                    <ScrollArea
+                      h={400}
+                      p="md"
                       ref={scrollAreaRef}
                       viewportRef={scrollViewportRef}
                       className={classes.messagesArea}
@@ -681,9 +814,13 @@ export function AiChat() {
                       <Stack gap="md">
                         {messages.length === 0 ? (
                           <Box ta="center" py="xl">
-                            <IconRobot size={48} color="#1e3a8a" style={{ opacity: 0.3 }} />
+                            <IconRobot
+                              size={48}
+                              color="#1e3a8a"
+                              style={{ opacity: 0.3 }}
+                            />
                             <Text c="dimmed" mt="md">
-                              {isAuthenticated 
+                              {isAuthenticated
                                 ? 'Задайте вопрос о финансах, и я помогу вам!'
                                 : 'Войдите в систему, чтобы использовать Ивана Банкова'}
                             </Text>
@@ -696,49 +833,101 @@ export function AiChat() {
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ duration: 0.2 }}
                             >
-                              <Group
-                                align="flex-start"
-                                gap="sm"
-                                style={{
-                                  flexDirection: message.role === 'user' ? 'row-reverse' : 'row',
-                                }}
+                              <Stack
+                                gap="xs"
+                                style={{ width: '100%', maxWidth: '80%' }}
                               >
-                                <Paper
-                                  p="md"
-                                  radius="md"
+                                <Group
+                                  align="flex-start"
+                                  gap="sm"
                                   style={{
-                                    maxWidth: '80%',
-                                    background:
+                                    flexDirection:
                                       message.role === 'user'
-                                        ? 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)'
-                                        : undefined,
-                                    color: message.role === 'user' ? 'white' : 'inherit',
-                                    border: message.role === 'assistant' && !message.isRead ? '2px solid #3b82f6' : undefined,
+                                        ? 'row-reverse'
+                                        : 'row',
                                   }}
-                                  bg={message.role === 'user' ? undefined : 'gray.1'}
                                 >
-                                  <Group gap="xs" mb="xs" justify="space-between">
-                                    <Group gap="xs">
-                                      {message.role === 'user' ? (
-                                        <IconUser size={16} />
-                                      ) : (
-                                        <IconRobot size={16} />
-                                      )}
-                                      <Text size="xs" fw={500}>
-                                        {message.role === 'user' ? 'Вы' : 'Иван Банков'}
-                                      </Text>
+                                  <Paper
+                                    p="md"
+                                    radius="md"
+                                    style={{
+                                      maxWidth: '100%',
+                                      background:
+                                        message.role === 'user'
+                                          ? 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)'
+                                          : undefined,
+                                      color:
+                                        message.role === 'user'
+                                          ? 'white'
+                                          : 'inherit',
+                                      border:
+                                        message.role === 'assistant' &&
+                                        !message.isRead
+                                          ? '2px solid #3b82f6'
+                                          : undefined,
+                                    }}
+                                    bg={
+                                      message.role === 'user'
+                                        ? undefined
+                                        : 'gray.1'
+                                    }
+                                  >
+                                    <Group
+                                      gap="xs"
+                                      mb="xs"
+                                      justify="space-between"
+                                    >
+                                      <Group gap="xs">
+                                        {message.role === 'user' ? (
+                                          <IconUser size={16} />
+                                        ) : (
+                                          <IconRobot size={16} />
+                                        )}
+                                        <Text size="xs" fw={500}>
+                                          {message.role === 'user'
+                                            ? 'Вы'
+                                            : 'Иван Банков'}
+                                        </Text>
+                                      </Group>
+                                      {message.role === 'assistant' &&
+                                        !message.isRead && (
+                                          <Badge
+                                            size="xs"
+                                            color="blue"
+                                            variant="light"
+                                          >
+                                            Новое
+                                          </Badge>
+                                        )}
                                     </Group>
-                                    {message.role === 'assistant' && !message.isRead && (
-                                      <Badge size="xs" color="blue" variant="light">
-                                        Новое
-                                      </Badge>
-                                    )}
-                                  </Group>
-                                  <div style={{ fontSize: '0.875rem' }}>
-                                    {formatMarkdown(message.content)}
-                                  </div>
-                                </Paper>
-                              </Group>
+                                    <div style={{ fontSize: '0.875rem' }}>
+                                      {formatMarkdown(message.content)}
+                                    </div>
+                                  </Paper>
+                                </Group>
+                                {/* Premium button under assistant messages */}
+                                {message.role === 'assistant' && !isPremium && (
+                                  <Button
+                                    size="xs"
+                                    variant="gradient"
+                                    leftSection={<IconCrown size={14} />}
+                                    onClick={() => setShowPremiumModal(true)}
+                                    style={{
+                                      alignSelf:
+                                        message.role === 'assistant'
+                                          ? 'flex-start'
+                                          : 'flex-end',
+                                      marginTop: '4px',
+                                    }}
+                                    gradient={{
+                                      from: '#FFD700',
+                                      to: '#FFA500',
+                                    }}
+                                  >
+                                    Купить Premium
+                                  </Button>
+                                )}
+                              </Stack>
                             </motion.div>
                           ))
                         )}
@@ -747,7 +936,9 @@ export function AiChat() {
                             <Paper p="md" radius="md" bg="gray.1">
                               <Group gap="xs">
                                 <Loader size="sm" />
-                                <Text size="sm" c="dimmed">Думаю...</Text>
+                                <Text size="sm" c="dimmed">
+                                  Думаю...
+                                </Text>
                               </Group>
                             </Paper>
                           </Group>
@@ -765,7 +956,11 @@ export function AiChat() {
                               bg="gray.2"
                               style={{ position: 'relative' }}
                             >
-                              <Group justify="space-between" align="flex-start" gap="sm">
+                              <Group
+                                justify="space-between"
+                                align="flex-start"
+                                gap="sm"
+                              >
                                 <Text size="sm" style={{ flex: 1 }}>
                                   {lastAd.ads}
                                 </Text>
@@ -789,7 +984,11 @@ export function AiChat() {
                     <Box p="md" className={classes.inputArea}>
                       <Group gap="sm" align="flex-end">
                         <Textarea
-                          placeholder={isAuthenticated ? "Задайте вопрос о финансах..." : "Войдите в систему для использования"}
+                          placeholder={
+                            isAuthenticated
+                              ? 'Задайте вопрос о финансах...'
+                              : 'Войдите в систему для использования'
+                          }
                           value={input}
                           onChange={(e) => setInput(e.target.value)}
                           onKeyDown={handleKeyPress}
@@ -801,7 +1000,9 @@ export function AiChat() {
                         />
                         <Button
                           onClick={handleSend}
-                          disabled={!input.trim() || isLoading || !isAuthenticated}
+                          disabled={
+                            !input.trim() || isLoading || !isAuthenticated
+                          }
                           variant="gradient"
                           gradient={{ from: '#1e3a8a', to: '#3b82f6' }}
                           leftSection={<IconSend size={18} />}
@@ -817,7 +1018,22 @@ export function AiChat() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Premium Modal */}
+      <PremiumModal
+        opened={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
+        onUpgrade={() => {
+          // TODO: Replace with actual premium purchase logic
+          setIsPremium(true);
+          setShowPremiumModal(false);
+          notifications.show({
+            color: 'green',
+            title: 'Премиум активирован!',
+            message: 'Теперь у вас есть неограниченный доступ к AI ассистенту',
+          });
+        }}
+      />
     </>
   );
 }
-
