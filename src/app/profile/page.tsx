@@ -35,6 +35,7 @@ import {
   IconHistory,
   IconUpload,
   IconAlertCircle,
+  IconCrown,
 } from '@tabler/icons-react';
 import { useProfile } from '@/lib/hooks/useProfile';
 import { useLogoutMutation, useLazyGetTransactionsQuery, useGetTransactionsStatisticsQuery } from '@/lib/store/api/AuthApi';
@@ -45,6 +46,7 @@ import AnalyticsSection from './AnalyticsSection';
 import { useGetCurrentUserQuery } from '@/lib/store/api/UserApi';
 import Link from 'next/link';
 import { useMemo, useCallback } from 'react';
+import classes from './ProfilePage.module.css';
 
 const PAGE_STYLES = {
   background: 'linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%)',
@@ -74,6 +76,9 @@ export default function ProfilePage() {
   const { data: authUser, isLoading: authLoading, isSuccess: authOk } = useGetCurrentUserQuery();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Premium subscription state (temporary: hardcoded, will be replaced with API call)
+  const [isPremium] = useState(true);
   const [notifications, setNotifications] = useState({
     email: true,
     sms: true,
@@ -301,7 +306,7 @@ export default function ProfilePage() {
                 style={{
                   position: 'relative',
                   cursor: 'pointer',
-                  display: 'inline-block'
+                  display: 'inline-block',
                 }}
                 onMouseEnter={(e) => {
                   const overlay = e.currentTarget.querySelector('.avatar-overlay') as HTMLElement;
@@ -315,32 +320,61 @@ export default function ProfilePage() {
                   fileInputRef.current?.click();
                 }}
               >
-                  <Avatar 
-                    size={150} 
-                    radius="50%" 
-                    color="blue"
-                    src={hasAvatar() ? profile?.avatar : undefined}
-                  >
-                  {hasAvatar() ? null : <IconUser size={80} />}
-                </Avatar>
-                  <div
-                    className="avatar-overlay"
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      opacity: 0,
-                      transition: 'opacity 0.2s ease',
-                      pointerEvents: 'none'
-                    }}
-                  >
+                <div
+                  className={isPremium ? classes.premiumAvatarFrame : ''}
+                  style={{
+                    position: 'relative',
+                    display: 'inline-block',
+                  }}
+                >
+                  <div className={isPremium ? classes.premiumAvatarInner : ''}>
+                    <Avatar 
+                      size={150} 
+                      radius="50%" 
+                      color="blue"
+                      src={hasAvatar() ? profile?.avatar : undefined}
+                      style={{
+                        position: 'relative',
+                        zIndex: 0,
+                      }}
+                    >
+                      {hasAvatar() ? null : <IconUser size={80} />}
+                    </Avatar>
+                  </div>
+                  {isPremium && (
+                    <div className={classes.premiumCrownBadge}>
+                      <IconCrown 
+                        size={24} 
+                        color="#fff" 
+                        fill="#fff"
+                        style={{
+                          filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))',
+                          zIndex: 1,
+                          position: 'relative',
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+                <div
+                  className="avatar-overlay"
+                  style={{
+                    position: 'absolute',
+                    top: isPremium ? '5px' : '0',
+                    left: isPremium ? '5px' : '0',
+                    right: isPremium ? '5px' : '0',
+                    bottom: isPremium ? '5px' : '0',
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    opacity: 0,
+                    transition: 'opacity 0.2s ease',
+                    pointerEvents: 'none',
+                    zIndex: 3,
+                  }}
+                >
                   <IconUpload size={30} color="white" />
                 </div>
               </div>

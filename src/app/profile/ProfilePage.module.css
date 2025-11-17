@@ -253,6 +253,173 @@
   transition: transform 0.2s ease;
 }
 
+/* Premium Golden Chrome Effect */
+.premiumAvatarFrame {
+  position: relative;
+  padding: 5px;
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    #D4AF37 0%,
+    #FFD700 15%,
+    #FFA500 30%,
+    #FFD700 45%,
+    #D4AF37 60%,
+    #B8860B 75%,
+    #D4AF37 90%,
+    #FFD700 100%
+  );
+  background-size: 300% 300%;
+  animation: premiumShine 4s ease-in-out infinite;
+  box-shadow: 
+    0 0 30px rgba(212, 175, 55, 0.6),
+    0 0 60px rgba(255, 215, 0, 0.4),
+    inset 0 0 20px rgba(255, 255, 255, 0.2),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  filter: drop-shadow(0 4px 12px rgba(212, 175, 55, 0.5));
+}
+
+.premiumAvatarFrame::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  background: 
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.4) 0%, transparent 50%),
+    radial-gradient(circle at 70% 70%, rgba(184, 134, 11, 0.3) 0%, transparent 50%),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.03) 2px,
+      rgba(0, 0, 0, 0.03) 4px
+    );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.premiumAvatarFrame::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 50%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 70%
+  );
+  animation: premiumReflection 3s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.premiumAvatarInner {
+  position: relative;
+  border-radius: 50%;
+  padding: 3px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(212, 175, 55, 0.8) 25%,
+    rgba(255, 215, 0, 1) 50%,
+    rgba(212, 175, 55, 0.8) 75%,
+    rgba(255, 255, 255, 0.6) 100%
+  );
+  box-shadow: 
+    inset 0 2px 8px rgba(255, 255, 255, 0.4),
+    inset 0 -2px 8px rgba(184, 134, 11, 0.3),
+    0 0 25px rgba(212, 175, 55, 0.7),
+    0 0 50px rgba(255, 215, 0, 0.5);
+  filter: brightness(1.05) contrast(1.1);
+}
+
+.premiumAvatarInner > * {
+  border-radius: 50%;
+}
+
+.premiumCrownBadge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    #D4AF37 0%,
+    #FFD700 25%,
+    #FFA500 50%,
+    #FFD700 75%,
+    #D4AF37 100%
+  );
+  background-size: 200% 200%;
+  animation: premiumShine 3s ease-in-out infinite;
+  box-shadow: 
+    0 4px 16px rgba(212, 175, 55, 0.6),
+    0 0 20px rgba(255, 215, 0, 0.5),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4),
+    inset 0 -2px 4px rgba(184, 134, 11, 0.3);
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+}
+
+.premiumCrownBadge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  background: 
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.5) 0%, transparent 60%),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 1px,
+      rgba(0, 0, 0, 0.02) 1px,
+      rgba(0, 0, 0, 0.02) 2px
+    );
+  pointer-events: none;
+}
+
+@keyframes premiumShine {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes premiumReflection {
+  0% {
+    transform: rotate(0deg);
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: rotate(360deg);
+    opacity: 0.3;
+  }
+}
+
 .hoverScale:hover {
   transform: scale(1.02);
 }

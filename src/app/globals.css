@@ -159,3 +159,5 @@ div[data-nextjs-toast] {
   z-index: -9999 !important;
 }
 
+/* Premium avatar animations are defined in ProfilePage.module.css */
+
